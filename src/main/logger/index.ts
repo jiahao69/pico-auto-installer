@@ -12,7 +12,8 @@ log4js.configure({
     console: { type: 'console' },
     everything: {
       type: 'file',
-      filename: join(logPath, `${dayjs().format('YYYY-MM-DD HH:mm:ss')}.log`)
+      filename: join(logPath, `${dayjs().format('YYYY-MM-DD')}.log`)
+      // filename: `logs/${dayjs().format('YYYY-MM-DD')}.log`
     }
   },
   categories: {
