@@ -1,0 +1,44 @@
+appId: com.electron.app
+# 生成的可执行文件名称
+productName: pico-auto-installer
+# 需要保留的Electron语言包，影响系统UI文字语言
+electronLanguages:
+  - 'zh-CN'
+  - 'en-US'
+directories:
+  # 构建时使用的资源(如安装程序图标、脚本),这些文件会被复制到最终生成的安装包中,但不会被打包进运行时资源中
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # 可执行文件名称，默认值是 productName
+  executableName: pico-auto-installer
+  # 应用图标，默认值是 build/icon.ico
+  icon: build/icon.ico
+nsis:
+  # 是否一键安装
+  oneClick: false
+  # 允许请求提升权限 如果为 false，用户必须使用提升权限重新启动安装程序
+  allowElevation: true
+  # 允许修改安装目录
+  allowToChangeInstallationDirectory: true
+  # 安装包文件名称
+  artifactName: ${name}-${version}-setup.${ext}
+  # 快捷方式名称
+  shortcutName: Pico头显一键安装程序
+  createDesktopShortcut: always
+npmRebuild: false
+publish:
+  provider: generic
+  url: https://example.com/auto-updates
