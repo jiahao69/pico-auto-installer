@@ -13,7 +13,6 @@ log4js.configure({
     everything: {
       type: 'file',
       filename: join(logPath, `${dayjs().format('YYYY-MM-DD')}.log`)
-      // filename: `logs/${dayjs().format('YYYY-MM-DD')}.log`
     }
   },
   categories: {

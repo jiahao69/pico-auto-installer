@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 
 import './App.less'
+import { version } from '../../../package.json'
 
 import MyInput from '@/components/MyInput/MyInput'
 
@@ -9,6 +10,7 @@ function App() {
   const [executeResult, setExecuteResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [serialno, setSerialno] = useState('')
+  const [adbVersion, setAdbVersion] = useState('')
 
   const [form] = Form.useForm()
   const isUploadOBB = Form.useWatch('isUploadOBB', form)
@@ -43,6 +45,10 @@ function App() {
     // 获取设备序列号
     window.electron?.ipcRenderer.on('electron:get-serialno', (_, { serialno }) => {
       setSerialno(serialno)
+    })
+
+    window.electron?.ipcRenderer.on('electron:adb-version', (_, { version }) => {
+      setAdbVersion(version)
     })
   }, [])
 
@@ -185,6 +191,11 @@ function App() {
           </div>
         </Form.Item>
       </Form>
+
+      <div className="version">
+        <span>应用版本：v{version}</span>
+        <span>内置adb版本：v{adbVersion}</span>
+      </div>
     </div>
   )
 }

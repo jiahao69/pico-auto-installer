@@ -5,14 +5,15 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getCommands } from './get-commands'
 import { installApp } from './install-app'
 import { getSerialno } from './get-serialno'
+import { setupAdbInPath, getAdbVersion } from './utils/adb-helper'
 
 app.commandLine.appendSwitch('lang', 'zh-CN')
 
-function createWindow(): void {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 880,
-    height: 720,
+    height: 740,
     show: false,
     autoHideMenuBar: true,
     resizable: false,
@@ -49,9 +50,14 @@ function createWindow(): void {
   mainWindow.webContents.on('did-finish-load', () => {
     // 获取设备序列号
     getSerialno(mainWindow)
-
     // 轮询获取设备序列号
     setInterval(() => getSerialno(mainWindow), 1000)
+
+    getAdbVersion().then((version) => {
+      mainWindow.webContents.send('electron:adb-version', {
+        version
+      })
+    })
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -85,6 +91,9 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  // 修改环境变量，集成adb
+  setupAdbInPath()
 
   createWindow()
 
