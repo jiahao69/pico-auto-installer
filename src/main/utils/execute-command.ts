@@ -1,13 +1,10 @@
+import { promisify } from 'util'
 import { exec } from 'child_process'
 
-export function executeCommand(command: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(stdout || stderr)
-      }
-    })
-  })
+// 使用 promisify 替代手动封装的 Promise
+const execPromise = promisify(exec)
+
+export async function executeCommand(command: string): Promise<string> {
+  const { stdout, stderr } = await execPromise(command)
+  return stdout || stderr
 }

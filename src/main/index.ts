@@ -6,7 +6,9 @@ import { getCommands } from './get-commands'
 import { installApp } from './install-app'
 import { getSerialno } from './get-serialno'
 import { setupAdbInPath, getAdbVersion } from './utils/adb-helper'
+import { createTray } from './create-tray'
 
+// 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
 
 function createWindow() {
@@ -22,6 +24,9 @@ function createWindow() {
       sandbox: false
     }
   })
+
+  // 创建系统托盘
+  createTray()
 
   // 显示文件选择对话框，获取文件路径
   ipcMain.on('show-dialog', async (_, { id, openType }: { id: string; openType: OpenType }) => {

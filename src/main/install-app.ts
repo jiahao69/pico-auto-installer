@@ -27,9 +27,7 @@ export async function installApp(
         name: `正在${item.name}`
       })
 
-      const output = await executeCommand(item.command)
-
-      logger.info(`${item.name}成功\n${output}`)
+      await executeCommand(item.command)
     } catch (error: any) {
       mainWindow.webContents.send('electron:execute-fail', {
         name: `${item.name}失败`

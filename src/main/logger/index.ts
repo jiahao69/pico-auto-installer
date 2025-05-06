@@ -12,7 +12,11 @@ log4js.configure({
     console: { type: 'console' },
     everything: {
       type: 'file',
-      filename: join(logPath, `${dayjs().format('YYYY-MM-DD')}.log`)
+      filename: join(logPath, `${dayjs().format('YYYY-MM-DD')}.log`),
+      layout: {
+        type: 'pattern',
+        pattern: '%d{yyyy-MM-dd hh:mm:ss.SSS} [%p] %c - %m'
+      }
     }
   },
   categories: {
