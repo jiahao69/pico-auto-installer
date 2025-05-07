@@ -4,9 +4,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 import { getCommands } from './get-commands'
 import { installApp } from './install-app'
-import { getSerialno } from './get-serialno'
-import { setupAdbInPath, getAdbVersion } from './utils/adb-helper'
+import { setupAdbInPath } from './utils/adb-helper'
 import { createTray } from './create-tray'
+import { readHistory } from './history'
+import { getDevices } from './utils/get-device-serialnos'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
@@ -15,7 +16,7 @@ function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 880,
-    height: 740,
+    height: 760,
     show: false,
     autoHideMenuBar: true,
     resizable: false,
@@ -24,9 +25,6 @@ function createWindow() {
       sandbox: false
     }
   })
-
-  // 创建系统托盘
-  createTray()
 
   // 显示文件选择对话框，获取文件路径
   ipcMain.on('show-dialog', async (_, { id, openType }: { id: string; openType: OpenType }) => {
@@ -47,22 +45,18 @@ function createWindow() {
   ipcMain.on('install-app', (_, options: FormType) => {
     const commands = getCommands(options)
 
-    console.log(commands)
-
     installApp(mainWindow, commands, options)
   })
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    // 获取设备序列号
-    getSerialno(mainWindow)
-    // 轮询获取设备序列号
-    setInterval(() => getSerialno(mainWindow), 1000)
+  // 获取安装历史
+  ipcMain.handle('get-install-history', () => {
+    return readHistory()
+  })
 
-    getAdbVersion().then((version) => {
-      mainWindow.webContents.send('electron:adb-version', {
-        version
-      })
-    })
+  ipcMain.handle('get-devices', async () => {
+    const devices = await getDevices()
+
+    return devices
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -97,10 +91,14 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // 修改环境变量，集成adb
-  setupAdbInPath()
+  // 创建系统托盘
+  createTray()
 
+  // 创建窗口
   createWindow()
+
+  // 设置adb环境变量
+  setupAdbInPath()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

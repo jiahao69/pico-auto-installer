@@ -1,16 +1,23 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Button, Checkbox, message } from 'antd'
+import { Form, Input, Button, Checkbox, message, Alert, Tag } from 'antd'
+import { LoadingOutlined, FieldTimeOutlined } from '@ant-design/icons'
 
 import './App.less'
 import { version } from '../../../package.json'
 
 import MyInput from '@/components/MyInput/MyInput'
+import InstallHistory from '@/components/InstallHistory/InstallHistory'
+import DeviceStatus from '@/components/DeviceStatus/DeviceStatus'
 
 function App() {
   const [executeResult, setExecuteResult] = useState('')
   const [loading, setLoading] = useState(false)
-  const [serialno, setSerialno] = useState('')
+  const [devices, setDevices] = useState<any[]>([])
+
+  const [successDevices, setSuccessDevices] = useState([])
+  const [installingSerialno, setInstallingSerialno] = useState('')
   const [adbVersion, setAdbVersion] = useState('')
+  const [historyVisible, setHistoryVisible] = useState(false)
 
   const [form] = Form.useForm()
   const isUploadOBB = Form.useWatch('isUploadOBB', form)
@@ -42,19 +49,19 @@ function App() {
       setExecuteResult('安装完成')
     })
 
-    // 获取设备序列号
-    window.electron?.ipcRenderer.on('electron:get-serialno', (_, { serialno }) => {
-      setSerialno(serialno)
-    })
-
+    // 获取adb版本号
     window.electron?.ipcRenderer.on('electron:adb-version', (_, { version }) => {
       setAdbVersion(version)
+    })
+
+    window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
+      setDevices(devices)
     })
   }, [])
 
   // 安装应用
   const onInstallApp = (values: FormType) => {
-    if (!serialno) {
+    if (!devices.length) {
       message.error('请检查设备是否连接')
       return
     }
@@ -66,20 +73,42 @@ function App() {
 
   return (
     <div className="auto-installer-container">
-      <div className="devices-status">{serialno ? `设备已连接: ${serialno}` : '设备未连接'}</div>
+      <div className="devices-status">
+        {/* <Alert
+          type={devices.length ? 'success' : 'error'}
+          message={
+            devices.length
+              ? devices.map((device) => (
+                  <Tag
+                    key={device.sn}
+                    icon={
+                      installingSerialno === device.sn ? <LoadingOutlined /> : <FieldTimeOutlined />
+                    }
+                    color={successDevices.includes(device.sn) ? 'success' : 'default'}
+                  >
+                    {device.sn}
+                  </Tag>
+                ))
+              : '设备未连接'
+          }
+          showIcon
+        /> */}
+
+        <DeviceStatus devices={devices} />
+      </div>
 
       <div className="execute-result">{executeResult}</div>
 
       <Form<FormType>
         form={form}
-        style={{ width: '80%' }}
+        style={{ width: '100%' }}
         onFinish={onInstallApp}
         onFinishFailed={() => {
           message.error('请检查信息是否填写正确')
         }}
       >
         <Form.Item
-          // initialValue="com.ch.yuanmingyuan.client"
+          initialValue="com.ch.yuanmingyuan.client"
           label="包名"
           name="packageName"
           rules={[{ required: true, message: '请填写包名' }]}
@@ -99,7 +128,7 @@ function App() {
 
         {isUploadMapZip && (
           <Form.Item
-            // initialValue="/Users/congxin/Downloads/YMY/DL.zip"
+            initialValue="/Users/congxin/Downloads/YMY/DL.zip"
             label="地图压缩包路径"
             name="mapZipPath"
             rules={[
@@ -115,7 +144,7 @@ function App() {
         )}
 
         <Form.Item
-          // initialValue="/Users/congxin/Downloads/YMY/YMY.apk"
+          initialValue="/Users/congxin/Downloads/YMY/YMY.apk"
           label="APK文件路径"
           name="apkFilePath"
           rules={[
@@ -141,7 +170,7 @@ function App() {
 
         {isUploadOBB && (
           <Form.Item
-            // initialValue="/Users/congxin/Downloads/YMY/main.2.com.ch.yuanmingyuan.client.obb"
+            initialValue="/Users/congxin/Downloads/YMY/main.2.com.ch.yuanmingyuan.client.obb"
             label="OBB文件路径"
             name="obbFilePath"
             rules={[
@@ -157,7 +186,7 @@ function App() {
         )}
 
         <Form.Item
-          // initialValue="YMYBS"
+          initialValue="YMYBS"
           label="配置文件目录"
           name="configDir"
           rules={[{ required: true, message: '请填写配置文件目录' }]}
@@ -166,7 +195,7 @@ function App() {
         </Form.Item>
 
         <Form.Item
-          // initialValue="/Users/congxin/Downloads/YMY/Config"
+          initialValue="/Users/congxin/Downloads/YMY/Config"
           label="配置文件夹路径"
           name="configFilePath"
           rules={[{ required: true, message: '请选择文件夹' }]}
@@ -175,7 +204,7 @@ function App() {
         </Form.Item>
 
         <Form.Item
-          // initialValue="/Users/congxin/Downloads/YMY/Json"
+          initialValue="/Users/congxin/Downloads/YMY/Json"
           label="动块文件夹路径"
           name="blockFilePath"
           rules={[{ required: true, message: '请选择文件夹' }]}
@@ -183,19 +212,21 @@ function App() {
           <MyInput placeholder="请选择" openType="openDirectory" />
         </Form.Item>
 
-        <Form.Item label={null}>
-          <div className="install-button">
-            <Button type="primary" htmlType="submit" loading={loading}>
-              一键安装
-            </Button>
-          </div>
-        </Form.Item>
+        <div className="buttons">
+          <Button type="primary" htmlType="submit" loading={loading}>
+            一键安装
+          </Button>
+
+          <Button onClick={() => setHistoryVisible(true)}>安装历史</Button>
+        </div>
       </Form>
 
       <div className="version">
-        <span>应用版本：v{version}</span>
-        <span>内置adb版本：v{adbVersion}</span>
+        <span>应用版本：{version}</span>
+        <span>内置adb版本：{adbVersion}</span>
       </div>
+
+      <InstallHistory open={historyVisible} onClose={() => setHistoryVisible(false)} />
     </div>
   )
 }

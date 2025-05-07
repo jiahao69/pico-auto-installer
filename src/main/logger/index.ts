@@ -15,7 +15,7 @@ log4js.configure({
       filename: join(logPath, `${dayjs().format('YYYY-MM-DD')}.log`),
       layout: {
         type: 'pattern',
-        pattern: '%d{yyyy-MM-dd hh:mm:ss.SSS} [%p] %c - %m'
+        pattern: '[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %c - %m'
       }
     }
   },
