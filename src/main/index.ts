@@ -6,8 +6,8 @@ import { getCommands } from './get-commands'
 import { installApp } from './install-app'
 import { setupAdbInPath } from './utils/adb-helper'
 import { createTray } from './create-tray'
-import { readHistory } from './history'
-import { getDevices } from './utils/get-device-serialnos'
+import { readHistory } from './install-history'
+import { getDevices } from './get-devices'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')

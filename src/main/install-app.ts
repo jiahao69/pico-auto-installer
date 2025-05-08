@@ -2,22 +2,19 @@ import { BrowserWindow } from 'electron'
 
 import { executeCommand } from './utils/execute-command'
 import { logger } from './logger'
-import { addHistory } from './history'
-import { getDevices } from './utils/get-device-serialnos'
+import { addHistory } from './install-history'
+import { getDevices } from './get-devices'
 
 export async function installApp(
   mainWindow: BrowserWindow,
   commands: Array<{ name: string; command: string }>,
   options: FormType
 ) {
-  // 安装成功的设备列表
-  const installSuccessDevices: string[] = []
-
   // 获取所有设备
   const devices = await getDevices()
 
   for (const device of devices) {
-    mainWindow.webContents.send('electron:get-installing-device', { serialno: device.sn })
+    console.log('当前安装设备:', device.sn)
 
     for (const item of commands) {
       // 跳过推送地图文件
@@ -34,7 +31,7 @@ export async function installApp(
       }
 
       // 替换命令，使用 -s 指定设备
-      const newCommand = item.command.replace('adb', `adb -s ${device.sn}`)
+      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device.sn}`)
 
       try {
         mainWindow.webContents.send('electron:execute-start', {
@@ -59,12 +56,9 @@ export async function installApp(
         return
       }
 
+      // 添加1s延迟
       await new Promise((resolve) => setTimeout(resolve, 1000))
     }
-
-    installSuccessDevices.push(device.sn)
-
-    mainWindow.webContents.send('electron:get-success-devices', { installSuccessDevices })
 
     // 记录成功历史
     addHistory({

@@ -2,21 +2,25 @@ import { memo } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Alert, Tag } from 'antd'
 
+interface Devices {
+  sn: string
+}
+
 interface IProps {
   children?: ReactNode
-  devices: any[]
+  devices: Devices[]
 }
 
 const DeviceStatus: FC<IProps> = ({ devices }) => {
   return (
     <Alert
+      showIcon
       type={devices.length ? 'success' : 'error'}
       message={
         devices.length
           ? devices.map((device) => <Tag key={device.sn}>{device.sn}</Tag>)
           : '设备未连接'
       }
-      showIcon
     />
   )
 }

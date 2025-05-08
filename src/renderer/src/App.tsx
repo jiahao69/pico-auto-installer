@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Button, Checkbox, message, Alert, Tag } from 'antd'
-import { LoadingOutlined, FieldTimeOutlined } from '@ant-design/icons'
+import { Form, Input, Button, Checkbox, message } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
@@ -14,17 +13,30 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [devices, setDevices] = useState<any[]>([])
 
-  const [successDevices, setSuccessDevices] = useState([])
-  const [installingSerialno, setInstallingSerialno] = useState('')
-  const [adbVersion, setAdbVersion] = useState('')
   const [historyVisible, setHistoryVisible] = useState(false)
 
   const [form] = Form.useForm()
   const isUploadOBB = Form.useWatch('isUploadOBB', form)
   const isUploadMapZip = Form.useWatch('isUploadMapZip', form)
 
+  // 轮询获取所有已连接设备
+  const getDevicesPolling = () => {
+    window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
+      setDevices(devices)
+    })
+
+    setInterval(() => {
+      window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
+        setDevices(devices)
+      })
+    }, 1000)
+  }
+
   useEffect(() => {
-    // 监听electron主进程发送的消息
+    // 轮询获取所有已连接设备
+    getDevicesPolling()
+
+    // 文件选择确认
     window.electron?.ipcRenderer.on('electron:select-file', (_, { id, filePath }) => {
       // 更新表单值
       form.setFieldValue(id, filePath)
@@ -48,15 +60,6 @@ function App() {
       setLoading(false)
       setExecuteResult('安装完成')
     })
-
-    // 获取adb版本号
-    window.electron?.ipcRenderer.on('electron:adb-version', (_, { version }) => {
-      setAdbVersion(version)
-    })
-
-    window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
-      setDevices(devices)
-    })
   }, [])
 
   // 安装应用
@@ -73,27 +76,8 @@ function App() {
 
   return (
     <div className="auto-installer-container">
+      {/* 设备状态 */}
       <div className="devices-status">
-        {/* <Alert
-          type={devices.length ? 'success' : 'error'}
-          message={
-            devices.length
-              ? devices.map((device) => (
-                  <Tag
-                    key={device.sn}
-                    icon={
-                      installingSerialno === device.sn ? <LoadingOutlined /> : <FieldTimeOutlined />
-                    }
-                    color={successDevices.includes(device.sn) ? 'success' : 'default'}
-                  >
-                    {device.sn}
-                  </Tag>
-                ))
-              : '设备未连接'
-          }
-          showIcon
-        /> */}
-
         <DeviceStatus devices={devices} />
       </div>
 
@@ -223,7 +207,6 @@ function App() {
 
       <div className="version">
         <span>应用版本：{version}</span>
-        <span>内置adb版本：{adbVersion}</span>
       </div>
 
       <InstallHistory open={historyVisible} onClose={() => setHistoryVisible(false)} />

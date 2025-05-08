@@ -1,4 +1,4 @@
-import { executeCommand } from './execute-command'
+import { executeCommand } from './utils/execute-command'
 
 // 返回格式示例
 // List of devices attached
@@ -15,7 +15,7 @@ export async function getDevices() {
     .filter((line) => line.includes('device') && line)
     // 提取设备序列号
     .map((line) => line.split('\t')[0])
-    .map((sn) => ({ sn, status: 'waiting' }))
+    .map((sn) => ({ sn }))
 
   return devices
 }
