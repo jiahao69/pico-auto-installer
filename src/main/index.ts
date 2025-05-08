@@ -75,6 +75,8 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -91,11 +93,11 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // 创建系统托盘
-  createTray()
-
   // 创建窗口
-  createWindow()
+  const mainWindow = createWindow()
+
+  // 创建系统托盘
+  createTray(mainWindow)
 
   // 设置adb环境变量
   setupAdbInPath()

@@ -9,7 +9,7 @@ const historyPath = join(userDataPath, 'history.json')
 
 export interface InstallHistory {
   timestamp: string
-  serialno: string
+  sn: string
   packageName: string
   status: 'success' | 'failed'
 }
@@ -24,6 +24,7 @@ function ensureHistoryFile() {
 // 读取历史记录
 export function readHistory(): InstallHistory[] {
   ensureHistoryFile()
+
   const data = fs.readFileSync(historyPath, 'utf-8')
   return JSON.parse(data)
 }
@@ -31,13 +32,15 @@ export function readHistory(): InstallHistory[] {
 // 添加历史记录
 export function addHistory(record: Omit<InstallHistory, 'timestamp'>) {
   ensureHistoryFile()
+
   const history = readHistory()
-  const newRecord: InstallHistory = {
+  const newRecord = {
     ...record,
     timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss')
   }
+  // 新记录添加到头部
   history.unshift(newRecord)
-  // 只保留最近100条记录
-  const trimmedHistory = history.slice(0, 100)
-  fs.writeFileSync(historyPath, JSON.stringify(trimmedHistory, null, 2))
+
+  // 写入到本地文件中
+  fs.writeFileSync(historyPath, JSON.stringify(history, null, 2))
 }

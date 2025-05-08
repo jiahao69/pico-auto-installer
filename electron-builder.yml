@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.pico-auto-installer
 # 生成的可执行文件名称
 productName: pico-auto-installer
 # 需要保留的Electron语言包，影响系统UI文字语言

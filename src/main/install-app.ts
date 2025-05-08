@@ -46,7 +46,7 @@ export async function installApp(
 
         // 记录失败历史
         addHistory({
-          serialno: device.sn,
+          sn: device.sn,
           packageName: options.packageName,
           status: 'failed'
         })
@@ -62,7 +62,7 @@ export async function installApp(
 
     // 记录成功历史
     addHistory({
-      serialno: device.sn,
+      sn: device.sn,
       packageName: options.packageName,
       status: 'success'
     })
