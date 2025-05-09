@@ -8,6 +8,7 @@ import { setupAdbInPath } from './utils/adb-helper'
 import { createTray } from './create-tray'
 import { readHistory } from './install-history'
 import { getDevices } from './get-devices'
+import { executeCommand } from './utils/execute-command'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
@@ -91,6 +92,18 @@ app.whenReady().then(() => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // 关闭adb服务
+  app.on('before-quit', async () => {
+    if (process.platform === 'win32') {
+      try {
+        await executeCommand('adb kill-server')
+      } catch (err) {
+        // 正常关闭adb服务失败，强制终止adb.exe
+        await executeCommand('taskkill /F /IM adb.exe')
+      }
+    }
   })
 
   // 创建窗口
