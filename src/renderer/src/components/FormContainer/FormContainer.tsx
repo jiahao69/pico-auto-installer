@@ -11,8 +11,6 @@ interface IProps {
   onFinish?: (value: FormType) => void
 }
 
-const isDefaultValue = false
-
 const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
   const [form] = Form.useForm()
 
@@ -20,7 +18,8 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
   const isUploadMapZip = Form.useWatch('isUploadMapZip', form)
 
   const getInitialValues = () => {
-    return isDefaultValue
+    // 开发模式下设置默认值
+    return import.meta.env.DEV
       ? {
           packageName: 'com.ch.yuanmingyuan.client',
           isUploadMapZip: true,
