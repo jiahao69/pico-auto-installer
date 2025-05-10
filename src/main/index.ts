@@ -8,7 +8,7 @@ import { setupAdbInPath } from './utils/adb-helper'
 import { createTray } from './create-tray'
 import { readHistory } from './install-history'
 import { getDevices } from './get-devices'
-import { killAdb } from './kill-adb'
+import { killAdbBeforeQuit } from './kill-adb'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
@@ -104,7 +104,7 @@ app.whenReady().then(() => {
   createTray(mainWindow)
 
   // 关闭应用前杀死adb进程
-  killAdb()
+  killAdbBeforeQuit()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

@@ -2,7 +2,8 @@ import { app } from 'electron'
 
 import { executeCommand } from './utils/execute-command'
 
-export function killAdb() {
+// 关闭应用前杀死adb进程
+export function killAdbBeforeQuit() {
   app.on('before-quit', async () => {
     if (process.platform === 'win32') {
       try {
