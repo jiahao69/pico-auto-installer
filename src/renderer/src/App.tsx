@@ -3,6 +3,7 @@ import { message } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
+import { useGetDevicesPolling } from '@/hooks/useGetDevicesPolling'
 
 import DeviceStatus from '@/components/DeviceStatus/DeviceStatus'
 import FormContainer from '@/components/FormContainer/FormContainer'
@@ -12,25 +13,11 @@ function App() {
   const [executeResult, setExecuteResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [historyVisible, setHistoryVisible] = useState(false)
-  const [devices, setDevices] = useState<any[]>([])
 
   // 轮询获取所有已连接设备
-  const getDevicesPolling = () => {
-    window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
-      setDevices(devices)
-    })
-
-    setInterval(() => {
-      window.electron?.ipcRenderer.invoke('get-devices').then((devices) => {
-        setDevices(devices)
-      })
-    }, 1000)
-  }
+  const { devices } = useGetDevicesPolling()
 
   useEffect(() => {
-    // 轮询获取所有已连接设备
-    getDevicesPolling()
-
     // 执行开始
     window.electron?.ipcRenderer.on('electron:execute-start', (_, { name }) => {
       setExecuteResult(name)
@@ -79,9 +66,7 @@ function App() {
       {/* 表单 */}
       <FormContainer loading={loading} onFinish={onInstallApp} />
 
-      <div className="version">
-        <span>应用版本：{version}</span>
-      </div>
+      <div className="version">应用版本：{version}</div>
 
       {/* 安装历史 */}
       <InstallHistory open={historyVisible} onClose={() => setHistoryVisible(false)} />

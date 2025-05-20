@@ -14,8 +14,6 @@ export async function installApp(
   const devices = await getDevices()
 
   for (const device of devices) {
-    console.log('当前安装设备:', device.sn)
-
     for (const item of commands) {
       // 跳过推送地图文件
       if (!options.isUploadMapZip && ['创建地图目录', '推送地图文件'].includes(item.name)) {
