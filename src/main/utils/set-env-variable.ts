@@ -8,9 +8,9 @@ export function setEnvVariable(binPath = adbBin) {
   const platform = process.platform
 
   // 获取可执行文件所在目录
-  const adbDir = dirname(binPath)
+  const binDir = dirname(binPath)
 
   if (platform === 'win32') {
-    process.env.PATH = `${adbDir}${delimiter}${process.env.PATH}`
+    process.env.PATH = `${binDir}${delimiter}${process.env.PATH}`
   }
 }
