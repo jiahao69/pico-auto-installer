@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 import { getCommands } from './get-commands'
 import { installApp } from './install-app'
-import { setupAdbInPath } from './utils/adb-helper'
+import { setEnvVariable } from './utils/set-env-variable'
 import { createTray } from './create-tray'
 import { readHistory } from './install-history'
 import { getDevices } from './get-devices'
@@ -98,7 +98,7 @@ app.whenReady().then(() => {
   const mainWindow = createWindow()
 
   // 设置adb环境变量
-  setupAdbInPath()
+  setEnvVariable()
 
   // 创建系统托盘
   createTray(mainWindow)
