@@ -5,7 +5,7 @@ import './App.less'
 import { version } from '../../../package.json'
 import { useGetDevicesPolling } from '@/hooks/useGetDevicesPolling'
 
-import DeviceStatus from '@/components/DeviceStatus/DeviceStatus'
+import DevicesStatus from '@/components/DevicesStatus/DevicesStatus'
 import FormContainer from '@/components/FormContainer/FormContainer'
 import InstallHistory from '@/components/InstallHistory/InstallHistory'
 
@@ -57,7 +57,7 @@ function App() {
     <div className="auto-installer-container">
       {/* 设备状态 */}
       <div className="devices-status">
-        <DeviceStatus devices={devices} />
+        <DevicesStatus devices={devices} />
       </div>
 
       {/* 执行结果 */}

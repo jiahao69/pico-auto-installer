@@ -11,7 +11,7 @@ interface IProps {
   devices: Devices[]
 }
 
-const DeviceStatus: FC<IProps> = ({ devices }) => {
+const DevicesStatus: FC<IProps> = ({ devices }) => {
   return (
     <Alert
       showIcon
@@ -25,4 +25,4 @@ const DeviceStatus: FC<IProps> = ({ devices }) => {
   )
 }
 
-export default memo(DeviceStatus)
+export default memo(DevicesStatus)
