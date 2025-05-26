@@ -27,6 +27,10 @@ function createWindow() {
     }
   })
 
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+  })
+
   ipcMain.handle('select-file', async (_, openType) => {
     // 显示文件选择对话框
     const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -48,19 +52,13 @@ function createWindow() {
   })
 
   // 获取安装历史
-  ipcMain.handle('get-install-history', () => {
-    return readHistory()
-  })
+  ipcMain.handle('get-install-history', () => readHistory())
 
   // 获取所有已连接设备
   ipcMain.handle('get-devices', async () => {
     const devices = await getDevices()
 
     return devices
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
