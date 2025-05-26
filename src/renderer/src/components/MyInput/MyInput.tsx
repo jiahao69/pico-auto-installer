@@ -6,11 +6,10 @@ import './MyInput.less'
 
 interface IProps extends Omit<InputProps, 'disabled' | 'placeholder'> {
   children?: ReactNode
-  buttonName?: string
   openType?: OpenType
 }
 
-const MyInput: FC<IProps> = ({ buttonName = '选择', openType = 'openFile', ...props }) => {
+const MyInput: FC<IProps> = ({ openType = 'openFile', ...props }) => {
   // 获取当前上下文正在使用的 Form 实例，常见于封装子组件消费无需透传 Form 实例
   const form = Form.useFormInstance()
 
@@ -35,7 +34,7 @@ const MyInput: FC<IProps> = ({ buttonName = '选择', openType = 'openFile', ...
           })
         }}
       >
-        {buttonName}
+        选择
       </Button>
     </div>
   )
