@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react'
+import { memo } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 
@@ -33,15 +33,6 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
         }
       : { isUploadMapZip: true, isUploadOBB: true }
   }
-
-  useEffect(() => {
-    window.electron?.ipcRenderer.on('electron:select-file', (_, { id, filePath }) => {
-      // 更新表单值
-      form.setFieldValue(id, filePath)
-      // 触发校验
-      form.validateFields([id])
-    })
-  }, [])
 
   return (
     <Form<FormType>
@@ -81,7 +72,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
             }
           ]}
         >
-          <MyInput placeholder="请选择" />
+          <MyInput />
         </Form.Item>
       )}
 
@@ -96,7 +87,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
           }
         ]}
       >
-        <MyInput placeholder="请选择" />
+        <MyInput />
       </Form.Item>
 
       <Form.Item
@@ -120,7 +111,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
             }
           ]}
         >
-          <MyInput placeholder="请选择" />
+          <MyInput />
         </Form.Item>
       )}
 
@@ -137,7 +128,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
         name="configFilePath"
         rules={[{ required: true, message: '请选择文件夹' }]}
       >
-        <MyInput placeholder="请选择" openType="openDirectory" />
+        <MyInput openType="openDirectory" />
       </Form.Item>
 
       <Form.Item
@@ -145,7 +136,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
         name="blockFilePath"
         rules={[{ required: true, message: '请选择文件夹' }]}
       >
-        <MyInput placeholder="请选择" openType="openDirectory" />
+        <MyInput openType="openDirectory" />
       </Form.Item>
 
       <div className="buttons">

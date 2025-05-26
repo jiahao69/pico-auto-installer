@@ -27,8 +27,8 @@ function createWindow() {
     }
   })
 
-  // 显示文件选择对话框，获取文件路径
-  ipcMain.on('show-dialog', async (_, { id, openType }: { id: string; openType: OpenType }) => {
+  ipcMain.handle('select-file', async (_, openType) => {
+    // 显示文件选择对话框
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: [openType]
     })
@@ -36,10 +36,8 @@ function createWindow() {
     // 用户取消选择
     if (canceled) return
 
-    mainWindow.webContents.send('electron:select-file', {
-      id,
-      filePath: filePaths[0]
-    })
+    // 返回文件路径
+    return filePaths[0]
   })
 
   // 安装应用
@@ -54,6 +52,7 @@ function createWindow() {
     return readHistory()
   })
 
+  // 获取所有已连接设备
   ipcMain.handle('get-devices', async () => {
     const devices = await getDevices()
 

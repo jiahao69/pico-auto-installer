@@ -18,25 +18,27 @@ function App() {
   const { devices } = useGetDevicesPolling()
 
   useEffect(() => {
+    const ipcRenderer = window.electron?.ipcRenderer
+
     // 执行开始
-    window.electron?.ipcRenderer.on('electron:execute-start', (_, { name }) => {
+    ipcRenderer.on('electron:execute-start', (_, { name }) => {
       setExecuteResult(name)
     })
 
     // 执行失败
-    window.electron?.ipcRenderer.on('electron:execute-fail', (_, { name }) => {
+    ipcRenderer.on('electron:execute-fail', (_, { name }) => {
       setLoading(false)
       setExecuteResult(name)
     })
 
     // 安装完成
-    window.electron?.ipcRenderer.on('electron:install-complete', () => {
+    ipcRenderer.on('electron:install-complete', () => {
       setLoading(false)
       setExecuteResult('安装完成')
     })
 
-    // 打开安装历史
-    window.electron?.ipcRenderer.on('electron:open-install-history', () => {
+    // 打开安装历史弹窗
+    ipcRenderer.on('electron:open-install-history', () => {
       setHistoryVisible(true)
     })
   }, [])
