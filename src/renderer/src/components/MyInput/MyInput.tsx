@@ -25,6 +25,9 @@ const MyInput: FC<IProps> = ({ buttonName = '选择', openType = 'openFile', ...
         onClick={() => {
           // 选择文件
           window.electron?.ipcRenderer.invoke('select-file', openType).then((filePath: string) => {
+            // 用户取消选择
+            if (!filePath) return
+
             // 更新表单值
             form.setFieldValue(props.id, filePath)
             // 触发校验

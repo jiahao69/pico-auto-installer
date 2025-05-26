@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { message } from 'antd'
 
 import './App.less'
@@ -44,16 +44,19 @@ function App() {
   }, [])
 
   // 点击一键安装
-  const onInstallApp = (values: FormType) => {
-    if (!devices.length) {
-      message.error('请检查设备是否连接')
-      return
-    }
+  const onInstallApp = useCallback(
+    (values: FormType) => {
+      if (!devices.length) {
+        message.error('请检查设备是否连接')
+        return
+      }
 
-    setLoading(true)
-    // 执行安装脚本
-    window.electron?.ipcRenderer.send('install-app', values)
-  }
+      setLoading(true)
+      // 执行安装脚本
+      window.electron?.ipcRenderer.send('install-app', values)
+    },
+    [devices.length]
+  )
 
   return (
     <div className="auto-installer-container">

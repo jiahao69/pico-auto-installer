@@ -34,7 +34,7 @@ function createWindow() {
     })
 
     // 用户取消选择
-    if (canceled) return ''
+    if (canceled) return
 
     // 返回文件路径
     return filePaths[0]
