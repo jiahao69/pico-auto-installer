@@ -1,4 +1,4 @@
-import { BrowserWindow, app, Tray, Menu, nativeImage, shell } from 'electron'
+import { app, BrowserWindow, Tray, nativeImage, Menu, shell } from 'electron'
 import { join } from 'path'
 
 import appIcon from '../../build/icon.png?asset'

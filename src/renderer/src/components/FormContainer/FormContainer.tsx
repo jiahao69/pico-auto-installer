@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 
@@ -17,7 +17,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
   const isUploadOBB = Form.useWatch('isUploadOBB', form)
   const isUploadMapZip = Form.useWatch('isUploadMapZip', form)
 
-  const getInitialValues = () => {
+  const getInitialValues = useCallback(() => {
     // 开发模式下设置默认值
     return import.meta.env.DEV
       ? {
@@ -32,7 +32,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
           blockFilePath: '/Users/congxin/Downloads/YMY/Json'
         }
       : { isUploadMapZip: true, isUploadOBB: true }
-  }
+  }, [])
 
   return (
     <Form<FormType>

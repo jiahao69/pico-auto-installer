@@ -2,10 +2,6 @@ import { memo } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Alert, Tag } from 'antd'
 
-interface Devices {
-  sn: string
-}
-
 interface IProps {
   children?: ReactNode
   devices: Devices[]
