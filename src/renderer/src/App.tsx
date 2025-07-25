@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { message } from 'antd'
+import { message, Tabs } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
@@ -50,7 +50,6 @@ function App() {
         message.error('请检查设备是否连接')
         return
       }
-
       setLoading(true)
       // 执行安装脚本
       window.electron?.ipcRenderer.send('install-app', values)
@@ -65,11 +64,34 @@ function App() {
         <DevicesStatus devices={devices} />
       </div>
 
-      {/* 执行结果 */}
-      <div className="execute-result">{executeResult}</div>
+      <Tabs
+        defaultActiveKey="1"
+        items={[
+          {
+            key: '1',
+            label: '安装应用',
+            children: (
+              <>
+                {/* 执行结果 */}
+                <div className="execute-result">{executeResult}</div>
 
-      {/* 表单 */}
-      <FormContainer loading={loading} onFinish={onInstallApp} />
+                {/* 表单 */}
+                <FormContainer loading={loading} onFinish={onInstallApp} />
+              </>
+            )
+          },
+          {
+            key: '2',
+            label: '推送配置文件',
+            children: <></>
+          },
+          {
+            key: '3',
+            label: '连接局域网设备',
+            children: <></>
+          }
+        ]}
+      />
 
       <div className="version">应用版本：{version}</div>
 
