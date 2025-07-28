@@ -3,12 +3,12 @@ import { join } from 'path'
 
 import appIcon from '../../build/icon.png?asset'
 
-const userDataPath = app.getPath('userData')
-const logPath = join(userDataPath, 'logs')
-
 // 创建系统托盘
 export function createTray(mainWindow: BrowserWindow) {
   const tray = new Tray(nativeImage.createFromPath(appIcon))
+
+  const userDataPath = app.getPath('userData')
+  const logPath = join(userDataPath, 'logs')
 
   const contextMenu = Menu.buildFromTemplate([
     {

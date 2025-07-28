@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import find from 'local-devices'
 
 import { getCommands } from './get-commands'
 import { installApp } from './install-app'
@@ -31,6 +32,7 @@ function createWindow() {
     mainWindow.show()
   })
 
+  // 点击选择按钮触发
   ipcMain.handle('select-file', async (_, openType) => {
     // 显示文件选择对话框
     const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -45,18 +47,25 @@ function createWindow() {
   })
 
   // 安装应用
-  ipcMain.on('install-app', (_, options: FormType) => {
+  ipcMain.on('install-app', (_, options: FormType, isPushConfig: boolean) => {
     const commands = getCommands(options)
 
-    installApp(mainWindow, commands, options)
+    installApp(mainWindow, commands, options, isPushConfig)
   })
 
   // 获取安装历史
   ipcMain.handle('get-install-history', () => readHistory())
 
-  // 获取所有已连接设备
+  // 获取已连接设备
   ipcMain.handle('get-devices', async () => {
     const devices = await getDevices()
+
+    return devices
+  })
+
+  // 获取本地局域网设备
+  ipcMain.handle('get-local-devices', async () => {
+    const devices = await find()
 
     return devices
   })

@@ -8,9 +8,10 @@ import { getDevices } from './get-devices'
 export async function installApp(
   mainWindow: BrowserWindow,
   commands: Array<{ name: string; command: string }>,
-  options: FormType
+  options: FormType,
+  isPushConfig?: boolean
 ) {
-  // 获取所有设备
+  // 获取已连接设备
   const devices = await getDevices()
 
   for (const device of devices) {
@@ -28,8 +29,13 @@ export async function installApp(
         continue
       }
 
+      // 跳过非推送配置文件命令
+      if (isPushConfig && !['推送配置文件夹', '推送动块文件夹'].includes(item.name)) {
+        continue
+      }
+
       // 替换命令，使用 -s 指定设备
-      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device.sn}`)
+      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device.id}`)
 
       try {
         mainWindow.webContents.send('electron:execute-start', {
@@ -44,7 +50,7 @@ export async function installApp(
 
         // 记录失败历史
         addHistory({
-          sn: device.sn,
+          id: device.id,
           packageName: options.packageName,
           status: 'failed'
         })
@@ -53,14 +59,11 @@ export async function installApp(
 
         return
       }
-
-      // 添加1s延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
     // 记录成功历史
     addHistory({
-      sn: device.sn,
+      id: device.id,
       packageName: options.packageName,
       status: 'success'
     })

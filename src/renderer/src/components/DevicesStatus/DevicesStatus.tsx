@@ -14,7 +14,7 @@ const DevicesStatus: FC<IProps> = ({ devices }) => {
       type={devices.length ? 'success' : 'error'}
       message={
         devices.length
-          ? devices.map((device) => <Tag key={device.sn}>{device.sn}</Tag>)
+          ? devices.map((device) => <Tag key={device.id}>{device.id}</Tag>)
           : '设备未连接'
       }
     />

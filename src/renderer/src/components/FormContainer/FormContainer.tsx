@@ -2,7 +2,6 @@ import { memo, useCallback } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 
-import './FormContainer.less'
 import MyInput from '@/components/MyInput/MyInput'
 
 interface IProps {
@@ -139,7 +138,7 @@ const FormContainer: FC<IProps> = ({ loading, onFinish }) => {
         <MyInput openType="openDirectory" />
       </Form.Item>
 
-      <div className="buttons">
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button type="primary" htmlType="submit" loading={loading}>
           一键安装
         </Button>

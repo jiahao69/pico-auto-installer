@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback } from 'react'
-import { message, Tabs } from 'antd'
+import { message, Tabs, Alert, Button } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
 import { useGetDevicesPolling } from '@/hooks/useGetDevicesPolling'
 
-import DevicesStatus from '@/components/DevicesStatus/DevicesStatus'
 import FormContainer from '@/components/FormContainer/FormContainer'
 import InstallHistory from '@/components/InstallHistory/InstallHistory'
+import DevicesManagement from '@/components/DevicesManagement/DevicesManagement'
+import ConfigFormContainer from '@/components/ConfigFormContainer/ConfigFormContainer'
 
 function App() {
-  const [executeResult, setExecuteResult] = useState('')
+  const [executeResult, setExecuteResult] = useState('安装未开始')
   const [loading, setLoading] = useState(false)
   const [historyVisible, setHistoryVisible] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // 轮询获取所有已连接设备
   const { devices } = useGetDevicesPolling()
@@ -45,58 +47,62 @@ function App() {
 
   // 点击一键安装
   const onInstallApp = useCallback(
-    (values: FormType) => {
+    (values: FormType, isPushConfig?: boolean) => {
       if (!devices.length) {
         message.error('请检查设备是否连接')
         return
       }
       setLoading(true)
       // 执行安装脚本
-      window.electron?.ipcRenderer.send('install-app', values)
+      window.electron?.ipcRenderer.send('install-app', values, isPushConfig)
     },
     [devices.length]
   )
 
   return (
     <div className="auto-installer-container">
-      {/* 设备状态 */}
-      <div className="devices-status">
-        <DevicesStatus devices={devices} />
+      {/* 执行结果 */}
+      <div className="execute-result">
+        <Alert message={executeResult} type="info" showIcon />
       </div>
 
       <Tabs
-        defaultActiveKey="1"
+        tabBarExtraContent={{
+          right: (
+            <Button type="primary" onClick={() => setIsModalOpen(true)}>
+              设备管理
+            </Button>
+          )
+        }}
         items={[
           {
             key: '1',
             label: '安装应用',
             children: (
-              <>
-                {/* 执行结果 */}
-                <div className="execute-result">{executeResult}</div>
-
-                {/* 表单 */}
-                <FormContainer loading={loading} onFinish={onInstallApp} />
-              </>
+              <FormContainer loading={loading} onFinish={(values) => onInstallApp(values)} />
             )
           },
           {
             key: '2',
             label: '推送配置文件',
-            children: <></>
-          },
-          {
-            key: '3',
-            label: '连接局域网设备',
-            children: <></>
+            children: <ConfigFormContainer onFinish={(values) => onInstallApp(values, true)} />
           }
         ]}
       />
 
-      <div className="version">应用版本：{version}</div>
-
       {/* 安装历史 */}
-      <InstallHistory open={historyVisible} onClose={() => setHistoryVisible(false)} />
+      <InstallHistory
+        open={historyVisible}
+        onClose={useCallback(() => setHistoryVisible(false), [])}
+      />
+
+      {/* 设备管理 */}
+      <DevicesManagement
+        isModalOpen={isModalOpen}
+        onClose={useCallback(() => setIsModalOpen(false), [])}
+      />
+
+      <div className="version">V{version}</div>
     </div>
   )
 }

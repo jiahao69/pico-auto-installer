@@ -9,7 +9,7 @@ const historyPath = join(userDataPath, 'history.json')
 
 export interface InstallHistory {
   timestamp: string
-  sn: string
+  id: string
   packageName: string
   status: 'success' | 'failed'
 }

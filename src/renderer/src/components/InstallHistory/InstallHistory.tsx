@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 
 interface DataType {
   timestamp: string
-  sn: string
+  id: string
   packageName: string
   status: 'success' | 'failed'
 }
@@ -17,9 +17,9 @@ const columns: ColumnsType<DataType> = [
     key: 'timestamp'
   },
   {
-    title: '设备序列号',
-    dataIndex: 'sn',
-    key: 'sn'
+    title: '设备标识',
+    dataIndex: 'id',
+    key: 'id'
   },
   {
     title: '包名',
