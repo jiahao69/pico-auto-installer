@@ -10,6 +10,7 @@ import { createTray } from './create-tray'
 import { readHistory } from './install-history'
 import { getDevices } from './get-devices'
 import { killAdbBeforeQuit } from './kill-adb'
+import { executeCommand } from './utils/execute-command'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
@@ -53,9 +54,6 @@ function createWindow() {
     installApp(mainWindow, commands, options, isPushConfig)
   })
 
-  // 获取安装历史
-  ipcMain.handle('get-install-history', () => readHistory())
-
   // 获取已连接设备
   ipcMain.handle('get-devices', async () => {
     const devices = await getDevices()
@@ -69,6 +67,25 @@ function createWindow() {
 
     return devices
   })
+
+  // 连接设备
+  ipcMain.on('conncet-devices', async (_, ip: string) => {
+    const result = await executeCommand(`adb connect ${ip}`)
+    console.log('连接设备', result)
+  })
+
+  // 断开设备
+  ipcMain.on('disconncet-devices', async (_, ip: string) => {
+    try {
+      const result = await executeCommand(`adb disconnect ${ip}`)
+      console.log('断开设备:', result)
+    } catch (err: any) {
+      console.log(err.stderr)
+    }
+  })
+
+  // 获取安装历史
+  ipcMain.handle('get-install-history', () => readHistory())
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)

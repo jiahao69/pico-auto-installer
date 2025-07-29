@@ -15,7 +15,6 @@ export async function getDevices() {
     .filter((line) => line.includes('device') && line)
     // 提取设备序列号
     .map((line) => line.split('\t')[0])
-    .map((id) => ({ id }))
 
   return devices
 }

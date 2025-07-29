@@ -3,7 +3,6 @@ import { message, Tabs, Alert, Button } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
-import { useGetDevicesPolling } from '@/hooks/useGetDevicesPolling'
 
 import FormContainer from '@/components/FormContainer/FormContainer'
 import InstallHistory from '@/components/InstallHistory/InstallHistory'
@@ -15,9 +14,6 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [historyVisible, setHistoryVisible] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // 轮询获取所有已连接设备
-  const { devices } = useGetDevicesPolling()
 
   useEffect(() => {
     const ipcRenderer = window.electron?.ipcRenderer
@@ -46,18 +42,15 @@ function App() {
   }, [])
 
   // 点击一键安装
-  const onInstallApp = useCallback(
-    (values: FormType, isPushConfig?: boolean) => {
-      if (!devices.length) {
-        message.error('请检查设备是否连接')
-        return
-      }
-      setLoading(true)
-      // 执行安装脚本
-      window.electron?.ipcRenderer.send('install-app', values, isPushConfig)
-    },
-    [devices.length]
-  )
+  const onInstallApp = useCallback((values: FormType, isPushConfig?: boolean) => {
+    // if (!devices.length) {
+    //   message.error('请检查设备是否连接')
+    //   return
+    // }
+    setLoading(true)
+    // 执行安装脚本
+    window.electron?.ipcRenderer.send('install-app', values, isPushConfig)
+  }, [])
 
   return (
     <div className="auto-installer-container">
@@ -85,7 +78,12 @@ function App() {
           {
             key: '2',
             label: '推送配置文件',
-            children: <ConfigFormContainer onFinish={(values) => onInstallApp(values, true)} />
+            children: (
+              <ConfigFormContainer
+                loading={loading}
+                onFinish={(values) => onInstallApp(values, true)}
+              />
+            )
           }
         ]}
       />

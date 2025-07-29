@@ -30,12 +30,15 @@ export async function installApp(
       }
 
       // 跳过非推送配置文件命令
-      if (isPushConfig && !['推送配置文件夹', '推送动块文件夹'].includes(item.name)) {
+      if (
+        isPushConfig &&
+        !['创建配置文件目录', '推送配置文件夹', '推送动块文件夹'].includes(item.name)
+      ) {
         continue
       }
 
       // 替换命令，使用 -s 指定设备
-      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device.id}`)
+      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device}`)
 
       try {
         mainWindow.webContents.send('electron:execute-start', {
@@ -50,7 +53,7 @@ export async function installApp(
 
         // 记录失败历史
         addHistory({
-          id: device.id,
+          id: device,
           packageName: options.packageName,
           status: 'failed'
         })
@@ -63,7 +66,7 @@ export async function installApp(
 
     // 记录成功历史
     addHistory({
-      id: device.id,
+      id: device,
       packageName: options.packageName,
       status: 'success'
     })

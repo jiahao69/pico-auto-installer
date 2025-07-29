@@ -11,7 +11,3 @@ type FormType = {
 }
 
 type OpenType = 'openFile' | 'openDirectory'
-
-type Devices = {
-  id: string
-}

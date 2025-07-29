@@ -11,7 +11,7 @@ export function getCommands(options: FormType) {
       name: '卸载旧应用',
       command: `adb shell "pm uninstall ${options.packageName} || true"`
     },
-    { name: '安装新应用', command: `adb install "${options.apkFilePath}"` },
+    { name: '安装新应用', command: `adb install ${options.apkFilePath}` },
     {
       name: '启动应用',
       command: `adb shell am start -n ${options.packageName}/com.epicgames.unreal.GameActivity`
