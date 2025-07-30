@@ -68,19 +68,13 @@ function createWindow() {
     return devices
   })
 
-  // 连接设备
-  ipcMain.on('conncet-devices', async (_, ip: string) => {
-    const result = await executeCommand(`adb connect ${ip}`)
-    console.log('连接设备', result)
-  })
-
-  // 断开设备
-  ipcMain.on('disconncet-devices', async (_, ip: string) => {
+  // 监听渲染进程执行命令
+  ipcMain.on('execute-command', async (_, command: string) => {
     try {
-      const result = await executeCommand(`adb disconnect ${ip}`)
-      console.log('断开设备:', result)
-    } catch (err: any) {
-      console.log(err.stderr)
+      const result = await executeCommand(command)
+      console.log(result)
+    } catch (err) {
+      console.log(err)
     }
   })
 

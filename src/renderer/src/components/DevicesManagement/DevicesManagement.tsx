@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useState, useMemo, useEffect } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Modal, Button, Checkbox, Tag, Divider } from 'antd'
 import { CheckCircleOutlined } from '@ant-design/icons'
@@ -16,6 +16,16 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
   const [connectedLocalDevices, setConnectedLocalDevices] = useState<string[]>([])
   const [checkedDevices, setCheckedDevices] = useState<string[]>([])
 
+  const indeterminate = useMemo(
+    () => checkedDevices.length > 0 && checkedDevices.length < localDevices.length,
+    [checkedDevices, localDevices]
+  )
+
+  const checkAll = useMemo(
+    () => checkedDevices.length === localDevices.length,
+    [checkedDevices, localDevices]
+  )
+
   useEffect(() => {
     // 搜索本地设备
     searchLocalDevices()
@@ -23,37 +33,54 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
   useEffect(() => {
     // 打开弹窗时回填已连接设备
-    if (isModalOpen) {
-      window.electron?.ipcRenderer.invoke('get-devices').then((devices: string[]) => {
-        // 已连接的USB设备
-        const connectedUsbDevices = devices.filter((item) => !item.includes(':'))
-        setUsbDevices(connectedUsbDevices)
-
-        // 已连接的本地设备
-        const connectedLocalDevices = devices
-          .filter((device) => device.includes(':'))
-          .map((device) => device.split(':')[0])
-
-        setConnectedLocalDevices(connectedLocalDevices)
-        setCheckedDevices(connectedLocalDevices)
-      })
-    }
+    isModalOpen && backFillDevices()
   }, [isModalOpen])
 
   // 搜索本地设备
-  const searchLocalDevices = () => {
+  const searchLocalDevices = async () => {
     setSearchDevicesLoading(true)
-    window.electron?.ipcRenderer
-      .invoke('get-local-devices')
-      .then((localDevices: Array<{ ip: string }>) => {
-        setLocalDevices(localDevices.map((item) => item.ip))
-        setSearchDevicesLoading(false)
-      })
+
+    const localDevices: Array<{ ip: string }> =
+      await window.electron?.ipcRenderer.invoke('get-local-devices')
+
+    setLocalDevices(localDevices.map((item) => item.ip))
+
+    setSearchDevicesLoading(false)
+  }
+
+  // 回填已连接设备
+  const backFillDevices = async () => {
+    const devices: string[] = await window.electron?.ipcRenderer.invoke('get-devices')
+
+    // 已连接的USB设备
+    const usbDevices = devices.filter((item) => !item.includes(':'))
+    setUsbDevices(usbDevices)
+
+    // 已连接的本地设备
+    const connectedLocalDevices = devices
+      .filter((device) => device.includes(':'))
+      .map((device) => device.split(':')[0])
+
+    setConnectedLocalDevices(connectedLocalDevices)
+    setCheckedDevices(connectedLocalDevices)
+  }
+
+  const onOk = () => {
+    // 1.断开所有设备
+    for (const device of localDevices) {
+      window.electron?.ipcRenderer.send('execute-command', `adb disconnect ${device}`)
+    }
+
+    // 2.连接选中的设备
+    for (const device of checkedDevices) {
+      window.electron?.ipcRenderer.send('execute-command', `adb connect ${device}`)
+    }
+
+    onClose()
   }
 
   return (
     <Modal
-      styles={{ body: { minHeight: '130px' } }}
       title="设备管理"
       open={isModalOpen}
       cancelText="取消"
@@ -62,19 +89,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
       loading={!!!localDevices.length}
       width="80%"
       onCancel={onClose}
-      onOk={() => {
-        // 1.断开所有设备
-        for (const device of localDevices) {
-          window.electron?.ipcRenderer.send('disconncet-devices', device)
-        }
-
-        // 2.连接选中的设备
-        for (const device of checkedDevices) {
-          window.electron?.ipcRenderer.send('conncet-devices', device)
-        }
-
-        onClose()
-      }}
+      onOk={onOk}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h4 style={{ marginRight: '20px' }}>无线连接(绿色代表设备已连接)</h4>
@@ -82,6 +97,16 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
           刷新设备
         </Button>
       </div>
+
+      <Checkbox
+        indeterminate={indeterminate}
+        onChange={(e) => {
+          setCheckedDevices(e.target.checked ? localDevices : [])
+        }}
+        checked={checkAll}
+      >
+        全选
+      </Checkbox>
       <Checkbox.Group<string>
         value={checkedDevices}
         onChange={(values) => {
