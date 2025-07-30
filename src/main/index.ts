@@ -9,7 +9,6 @@ import { setEnvVariable } from './utils/set-env-variable'
 import { createTray } from './create-tray'
 import { readHistory } from './install-history'
 import { getDevices } from './get-devices'
-import { killAdbBeforeQuit } from './kill-adb'
 import { executeCommand } from './utils/execute-command'
 
 // 设置系统UI文字为中文
@@ -69,7 +68,7 @@ function createWindow() {
   })
 
   // 监听渲染进程执行命令
-  ipcMain.on('execute-command', async (_, command: string) => {
+  ipcMain.handle('execute-command', async (_, command: string) => {
     try {
       const result = await executeCommand(command)
       console.log(result)
@@ -119,9 +118,6 @@ app.whenReady().then(() => {
 
   // 创建系统托盘
   createTray(mainWindow)
-
-  // 关闭应用前杀死adb进程
-  killAdbBeforeQuit()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

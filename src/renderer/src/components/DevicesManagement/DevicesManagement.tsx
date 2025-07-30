@@ -10,7 +10,9 @@ interface IProps {
 }
 
 const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
-  const [searchDevicesLoading, setSearchDevicesLoading] = useState(false)
+  const [refreshLoadiang, setRefreshLoadiang] = useState(false)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [backFillLoading, setBackFillLoading] = useState(false)
   const [localDevices, setLocalDevices] = useState<string[]>([])
   const [usbDevices, setUsbDevices] = useState<string[]>([])
   const [connectedLocalDevices, setConnectedLocalDevices] = useState<string[]>([])
@@ -38,18 +40,20 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
   // 搜索本地设备
   const searchLocalDevices = async () => {
-    setSearchDevicesLoading(true)
+    setRefreshLoadiang(true)
 
     const localDevices: Array<{ ip: string }> =
       await window.electron?.ipcRenderer.invoke('get-local-devices')
 
     setLocalDevices(localDevices.map((item) => item.ip))
 
-    setSearchDevicesLoading(false)
+    setRefreshLoadiang(false)
   }
 
   // 回填已连接设备
   const backFillDevices = async () => {
+    setBackFillLoading(true)
+
     const devices: string[] = await window.electron?.ipcRenderer.invoke('get-devices')
 
     // 已连接的USB设备
@@ -63,18 +67,30 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
     setConnectedLocalDevices(connectedLocalDevices)
     setCheckedDevices(connectedLocalDevices)
+
+    setBackFillLoading(false)
   }
 
-  const onOk = () => {
-    // 1.断开所有设备
-    for (const device of localDevices) {
-      window.electron?.ipcRenderer.send('execute-command', `adb disconnect ${device}`)
-    }
+  const onOk = async () => {
+    setConfirmLoading(true)
 
-    // 2.连接选中的设备
-    for (const device of checkedDevices) {
-      window.electron?.ipcRenderer.send('execute-command', `adb connect ${device}`)
-    }
+    if (!localDevices.length) return
+
+    const promises = localDevices.map((device) => {
+      if (checkedDevices.includes(device) && !connectedLocalDevices.includes(device)) {
+        return window.electron?.ipcRenderer.invoke('execute-command', `adb connect ${device}`)
+      }
+
+      if (!checkedDevices.includes(device) && connectedLocalDevices.includes(device)) {
+        return window.electron?.ipcRenderer.invoke('execute-command', `adb disconnect ${device}`)
+      }
+
+      return
+    })
+
+    await Promise.any(promises)
+
+    setConfirmLoading(false)
 
     onClose()
   }
@@ -86,14 +102,15 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
       cancelText="取消"
       okText="确认"
       maskClosable={false}
-      loading={!!!localDevices.length}
+      loading={!!!localDevices.length || backFillLoading}
+      confirmLoading={confirmLoading}
       width="80%"
       onCancel={onClose}
       onOk={onOk}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h4 style={{ marginRight: '20px' }}>无线连接(绿色代表设备已连接)</h4>
-        <Button type="primary" loading={searchDevicesLoading} onClick={searchLocalDevices}>
+        <Button type="primary" loading={refreshLoadiang} onClick={searchLocalDevices}>
           刷新设备
         </Button>
       </div>
