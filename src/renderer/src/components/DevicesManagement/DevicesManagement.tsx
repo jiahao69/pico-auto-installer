@@ -102,6 +102,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
     setConfirmLoading(false)
 
     onClose()
+    message.success('操作成功')
   }
 
   return (
