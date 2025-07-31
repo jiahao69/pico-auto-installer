@@ -1,6 +1,6 @@
 import { memo, useState, useMemo, useEffect } from 'react'
 import type { FC, ReactNode } from 'react'
-import { Modal, Button, Checkbox, Tag, Divider } from 'antd'
+import { Modal, Button, Checkbox, Tag, Divider, message } from 'antd'
 import { CheckCircleOutlined } from '@ant-design/icons'
 
 interface IProps {
@@ -9,10 +9,17 @@ interface IProps {
   onClose: () => void
 }
 
+interface LocalDevices {
+  name: string
+  ip: string
+  mac: string
+}
+
+const ipcRenderer = window.electron?.ipcRenderer
+
 const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
-  const [refreshLoadiang, setRefreshLoadiang] = useState(false)
+  const [refreshLoading, setRefreshLoading] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
-  const [backFillLoading, setBackFillLoading] = useState(false)
   const [localDevices, setLocalDevices] = useState<string[]>([])
   const [usbDevices, setUsbDevices] = useState<string[]>([])
   const [connectedLocalDevices, setConnectedLocalDevices] = useState<string[]>([])
@@ -40,21 +47,18 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
   // 搜索本地设备
   const searchLocalDevices = async () => {
-    setRefreshLoadiang(true)
+    setRefreshLoading(true)
 
-    const localDevices: Array<{ ip: string }> =
-      await window.electron?.ipcRenderer.invoke('get-local-devices')
+    const localDevices: LocalDevices[] = await ipcRenderer.invoke('get-local-devices')
 
     setLocalDevices(localDevices.map((item) => item.ip))
 
-    setRefreshLoadiang(false)
+    setRefreshLoading(false)
   }
 
   // 回填已连接设备
   const backFillDevices = async () => {
-    setBackFillLoading(true)
-
-    const devices: string[] = await window.electron?.ipcRenderer.invoke('get-devices')
+    const devices: string[] = await ipcRenderer.invoke('get-devices')
 
     // 已连接的USB设备
     const usbDevices = devices.filter((item) => !item.includes(':'))
@@ -67,28 +71,33 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
     setConnectedLocalDevices(connectedLocalDevices)
     setCheckedDevices(connectedLocalDevices)
-
-    setBackFillLoading(false)
   }
 
   const onOk = async () => {
+    if (!localDevices.length) {
+      message.error('不存在无线连接设备，请检查')
+      return
+    }
+
     setConfirmLoading(true)
 
-    if (!localDevices.length) return
-
     const promises = localDevices.map((device) => {
+      // 连接(勾选且未连接的设备)
       if (checkedDevices.includes(device) && !connectedLocalDevices.includes(device)) {
-        return window.electron?.ipcRenderer.invoke('execute-command', `adb connect ${device}`)
+        return ipcRenderer.invoke('execute-command', `adb connect ${device}`)
       }
 
+      // 断开连接(未勾选且已连接的设备)
       if (!checkedDevices.includes(device) && connectedLocalDevices.includes(device)) {
-        return window.electron?.ipcRenderer.invoke('execute-command', `adb disconnect ${device}`)
+        return ipcRenderer.invoke('execute-command', `adb disconnect ${device}`)
       }
 
-      return
+      // 不需要处理的设备
+      return Promise.resolve()
     })
 
-    await Promise.any(promises)
+    // 所有promise结果都已敲定时返回的promise将被兑现
+    await Promise.allSettled(promises)
 
     setConfirmLoading(false)
 
@@ -102,15 +111,14 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
       cancelText="取消"
       okText="确认"
       maskClosable={false}
-      loading={!!!localDevices.length || backFillLoading}
       confirmLoading={confirmLoading}
       width="80%"
       onCancel={onClose}
       onOk={onOk}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h4 style={{ marginRight: '20px' }}>无线连接(绿色代表设备已连接)</h4>
-        <Button type="primary" loading={refreshLoadiang} onClick={searchLocalDevices}>
+        <h4 style={{ marginRight: '20px' }}>无线连接设备(绿色代表设备已连接)</h4>
+        <Button type="primary" loading={refreshLoading} onClick={searchLocalDevices}>
           刷新设备
         </Button>
       </div>
@@ -118,7 +126,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
       <Checkbox
         indeterminate={indeterminate}
         onChange={(e) => {
-          setCheckedDevices(e.target.checked ? localDevices : [])
+          setCheckedDevices(e.target.checked ? [...localDevices] : [])
         }}
         checked={checkAll}
       >
@@ -143,7 +151,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
       <Divider />
 
-      <h4>有线连接</h4>
+      <h4>USB连接设备</h4>
       <div style={{ display: 'flex', flexWrap: 'wrap', rowGap: '6px' }}>
         {usbDevices.map((device) => (
           <Tag icon={<CheckCircleOutlined />} color="success">

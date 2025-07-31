@@ -9,6 +9,8 @@ import InstallHistory from '@/components/InstallHistory/InstallHistory'
 import DevicesManagement from '@/components/DevicesManagement/DevicesManagement'
 import ConfigFormContainer from '@/components/ConfigFormContainer/ConfigFormContainer'
 
+const ipcRenderer = window.electron?.ipcRenderer
+
 function App() {
   const [executeResult, setExecuteResult] = useState('安装未开始')
   const [loading, setLoading] = useState(false)
@@ -16,8 +18,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
-    const ipcRenderer = window.electron?.ipcRenderer
-
     // 执行开始
     ipcRenderer.on('electron:execute-start', (_, { name }) => {
       setExecuteResult(name)
@@ -42,11 +42,14 @@ function App() {
   }, [])
 
   // 点击一键安装
-  const onInstallApp = useCallback((values: FormType, isPushConfig?: boolean) => {
-    // if (!devices.length) {
-    //   message.error('请检查设备是否连接')
-    //   return
-    // }
+  const onInstallApp = useCallback(async (values: FormType, isPushConfig?: boolean) => {
+    const devices: string[] = await ipcRenderer.invoke('get-devices')
+
+    if (!devices.length) {
+      message.error('请检查设备是否连接')
+      return
+    }
+
     setLoading(true)
     // 执行安装脚本
     window.electron?.ipcRenderer.send('install-app', values, isPushConfig)
