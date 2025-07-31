@@ -4,7 +4,7 @@ import { executeCommand } from './utils/execute-command'
 // List of devices attached
 // PA9410MGJ9090995G	device
 
-// 获取已连接设备列表
+// 获取已连接设备
 export async function getDevices() {
   const devices = (await executeCommand('adb devices'))
     // 通过换行符分割

@@ -12,7 +12,7 @@ import ConfigFormContainer from '@/components/ConfigFormContainer/ConfigFormCont
 const ipcRenderer = window.electron?.ipcRenderer
 
 function App() {
-  const [executeResult, setExecuteResult] = useState('安装未开始')
+  const [executeResult, setExecuteResult] = useState('未开始')
   const [loading, setLoading] = useState(false)
   const [historyVisible, setHistoryVisible] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -32,7 +32,7 @@ function App() {
     // 安装完成
     ipcRenderer.on('electron:install-complete', () => {
       setLoading(false)
-      setExecuteResult('安装完成')
+      setExecuteResult('完成')
     })
 
     // 打开安装历史弹窗

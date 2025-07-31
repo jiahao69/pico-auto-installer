@@ -60,7 +60,7 @@ function createWindow() {
     return devices
   })
 
-  // 获取本地局域网设备
+  // 获取本地设备
   ipcMain.handle('get-local-devices', async () => {
     const devices = await find({ skipNameResolution: true })
 
