@@ -54,6 +54,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
     setLocalDevices(localDevices.map((item) => item.ip))
 
     setRefreshLoading(false)
+    message.success('刷新成功')
   }
 
   // 回填已连接设备
