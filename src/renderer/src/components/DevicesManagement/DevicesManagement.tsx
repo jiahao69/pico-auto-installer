@@ -54,7 +54,6 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
     setLocalDevices(localDevices.map((item) => item.ip))
 
     setRefreshLoading(false)
-    message.success('刷新成功')
   }
 
   // 回填已连接设备
@@ -120,7 +119,14 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h4 style={{ marginRight: '20px' }}>无线连接设备(绿色代表设备已连接)</h4>
-        <Button type="primary" loading={refreshLoading} onClick={searchLocalDevices}>
+        <Button
+          type="primary"
+          loading={refreshLoading}
+          onClick={async () => {
+            await searchLocalDevices()
+            message.success('刷新成功')
+          }}
+        >
           刷新设备
         </Button>
       </div>

@@ -3,13 +3,13 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import find from 'local-devices'
 
+import { executeCommand } from './utils/execute-command'
+import { getDevices } from './utils/get-devices'
+import { readHistory } from './install-history'
 import { getCommands } from './get-commands'
 import { installApp } from './install-app'
 import { setEnvVariable } from './utils/set-env-variable'
 import { createTray } from './create-tray'
-import { readHistory } from './install-history'
-import { getDevices } from './get-devices'
-import { executeCommand } from './utils/execute-command'
 
 // 设置系统UI文字为中文
 app.commandLine.appendSwitch('lang', 'zh-CN')
@@ -46,11 +46,14 @@ function createWindow() {
     return filePaths[0]
   })
 
-  // 安装应用
-  ipcMain.on('install-app', (_, options: FormType, isPushConfig: boolean) => {
-    const commands = getCommands(options)
-
-    installApp(mainWindow, commands, options, isPushConfig)
+  // 执行渲染进程发送的命令
+  ipcMain.handle('execute-command', async (_, command: string) => {
+    try {
+      const result = await executeCommand(command)
+      console.log(result)
+    } catch (err) {
+      console.log(err)
+    }
   })
 
   // 获取已连接设备
@@ -62,23 +65,21 @@ function createWindow() {
 
   // 获取本地设备
   ipcMain.handle('get-local-devices', async () => {
+    // skipNameResolution 跳过名称解析，提升性能
     const devices = await find({ skipNameResolution: true })
 
     return devices
   })
 
-  // 监听渲染进程执行命令
-  ipcMain.handle('execute-command', async (_, command: string) => {
-    try {
-      const result = await executeCommand(command)
-      console.log(result)
-    } catch (err) {
-      console.log(err)
-    }
-  })
-
   // 获取安装历史
   ipcMain.handle('get-install-history', () => readHistory())
+
+  // 安装应用
+  ipcMain.on('install-app', (_, options: FormType, isPushConfig: boolean) => {
+    const commands = getCommands(options)
+
+    installApp(mainWindow, commands, options, isPushConfig)
+  })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -113,7 +114,7 @@ app.whenReady().then(() => {
   // 创建窗口
   const mainWindow = createWindow()
 
-  // 设置adb环境变量
+  // 设置环境变量
   setEnvVariable()
 
   // 创建系统托盘

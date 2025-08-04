@@ -1,4 +1,4 @@
-import { executeCommand } from './utils/execute-command'
+import { executeCommand } from './execute-command'
 
 // 返回格式示例
 // List of devices attached

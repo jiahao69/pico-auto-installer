@@ -52,7 +52,7 @@ function App() {
 
     setLoading(true)
     // 执行安装脚本
-    window.electron?.ipcRenderer.send('install-app', values, isPushConfig)
+    ipcRenderer.send('install-app', values, isPushConfig)
   }, [])
 
   return (

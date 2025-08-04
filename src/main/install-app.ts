@@ -3,7 +3,7 @@ import { BrowserWindow } from 'electron'
 import { executeCommand } from './utils/execute-command'
 import { logger } from './logger'
 import { addHistory } from './install-history'
-import { getDevices } from './get-devices'
+import { getDevices } from './utils/get-devices'
 
 export async function installApp(
   mainWindow: BrowserWindow,
