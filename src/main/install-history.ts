@@ -31,8 +31,6 @@ export function readHistory(): InstallHistory[] {
 
 // 添加历史记录
 export function addHistory(record: Omit<InstallHistory, 'timestamp'>) {
-  ensureHistoryFile()
-
   const history = readHistory()
   const newRecord = {
     ...record,
