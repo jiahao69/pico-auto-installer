@@ -18,7 +18,8 @@ interface LocalDevices {
 const ipcRenderer = window.electron?.ipcRenderer
 
 const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
-  const [refreshLoading, setRefreshLoading] = useState(false)
+  const [localDevicesLoading, setLocalDevicesLoading] = useState(false)
+  const [usbDevicesLoading, setUsbDevicesLoading] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [localDevices, setLocalDevices] = useState<string[]>([])
   const [usbDevices, setUsbDevices] = useState<string[]>([])
@@ -47,13 +48,25 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
   // 搜索本地设备
   const searchLocalDevices = async () => {
-    setRefreshLoading(true)
+    setLocalDevicesLoading(true)
 
     const localDevices: LocalDevices[] = await ipcRenderer.invoke('get-local-devices')
 
     setLocalDevices(localDevices.map((item) => item.ip))
 
-    setRefreshLoading(false)
+    setLocalDevicesLoading(false)
+  }
+
+  // 搜索USB连接设备
+  const searchUsbDevices = async () => {
+    setUsbDevicesLoading(true)
+
+    const devices: string[] = await ipcRenderer.invoke('get-devices')
+
+    const usbDevices = devices.filter((item) => !item.includes(':'))
+    setUsbDevices(usbDevices)
+
+    setUsbDevicesLoading(false)
   }
 
   // 回填已连接设备
@@ -121,7 +134,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
         <h4 style={{ marginRight: '20px' }}>无线连接设备(绿色代表设备已连接)</h4>
         <Button
           type="primary"
-          loading={refreshLoading}
+          loading={localDevicesLoading}
           onClick={async () => {
             await searchLocalDevices()
             message.success('刷新成功')
@@ -159,7 +172,20 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
       <Divider />
 
-      <h4>USB连接设备</h4>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <h4 style={{ marginRight: '20px' }}>USB连接设备</h4>
+        <Button
+          type="primary"
+          loading={usbDevicesLoading}
+          onClick={async () => {
+            await searchUsbDevices()
+            message.success('刷新成功')
+          }}
+        >
+          刷新设备
+        </Button>
+      </div>
+
       <div style={{ display: 'flex', flexWrap: 'wrap', rowGap: '6px' }}>
         {usbDevices.map((device) => (
           <Tag icon={<CheckCircleOutlined />} color="success">

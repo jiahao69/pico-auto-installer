@@ -19,7 +19,7 @@ asarUnpack:
   - resources/**
 win:
   target:
-    - target: nsis
+    - target: portable
       arch:
         - x64
   # 可执行文件名称，默认值是 productName
@@ -38,6 +38,9 @@ nsis:
   # 快捷方式名称
   shortcutName: Pico头显一键安装程序
   createDesktopShortcut: always
+portable:
+  # 安装包文件名称
+  artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic
