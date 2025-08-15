@@ -2,11 +2,6 @@ import { getBasename } from './utils/get-basename'
 
 export function getCommands(options: FormType) {
   const commands = [
-    { name: '创建地图目录', command: 'adb shell mkdir -p /sdcard/maps' },
-    {
-      name: '推送地图文件',
-      command: `adb push "${options.mapZipPath}" /sdcard/maps/`
-    },
     {
       name: '卸载旧应用',
       command: `adb shell "pm uninstall ${options.packageName} || true"`

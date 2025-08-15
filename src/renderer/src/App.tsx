@@ -3,11 +3,11 @@ import { message, Tabs, Alert, Button } from 'antd'
 
 import './App.less'
 import { version } from '../../../package.json'
+import logo from '@/assets/images/logo.png'
 
 import FormContainer from '@/components/FormContainer/FormContainer'
 import InstallHistory from '@/components/InstallHistory/InstallHistory'
 import DevicesManagement from '@/components/DevicesManagement/DevicesManagement'
-import ConfigFormContainer from '@/components/ConfigFormContainer/ConfigFormContainer'
 
 const ipcRenderer = window.electron?.ipcRenderer
 
@@ -82,9 +82,10 @@ function App() {
             key: '2',
             label: '推送配置文件',
             children: (
-              <ConfigFormContainer
+              <FormContainer
                 loading={loading}
-                onFinish={(values) => onInstallApp(values, true)}
+                isPushConfig={true}
+                onFinish={(values) => onInstallApp(values)}
               />
             )
           }
@@ -102,6 +103,10 @@ function App() {
         isModalOpen={isModalOpen}
         onClose={useCallback(() => setIsModalOpen(false), [])}
       />
+
+      <div className="logo">
+        <img src={logo} alt="" />
+      </div>
 
       <div className="version">V{version}</div>
     </div>

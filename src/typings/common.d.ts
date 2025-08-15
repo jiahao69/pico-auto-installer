@@ -1,7 +1,5 @@
 type FormType = {
   packageName: string
-  isUploadMapZip: boolean
-  mapZipPath: string
   apkFilePath: string
   isUploadOBB: boolean
   obbFilePath: string

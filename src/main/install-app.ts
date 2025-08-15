@@ -16,11 +16,6 @@ export async function installApp(
 
   for (const device of devices) {
     for (const item of commands) {
-      // 跳过推送地图文件
-      if (!options.isUploadMapZip && ['创建地图目录', '推送地图文件'].includes(item.name)) {
-        continue
-      }
-
       // 跳过推送OBB文件
       if (
         !options.isUploadOBB &&
