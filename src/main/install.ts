@@ -1,18 +1,22 @@
 import { BrowserWindow } from 'electron'
 
-import { executeCommand } from './utils/execute-command'
-import { logger } from './logger'
-import { addHistory } from './install-history'
 import { getDevices } from './utils/get-devices'
+import { getCommands } from './get-commands'
+import { executeCommand } from './utils/execute-command'
+import { addHistory } from './install-history'
+import { logger } from './logger'
 
-export async function installApp(
+export async function install(
   mainWindow: BrowserWindow,
-  commands: Array<{ name: string; command: string }>,
   options: FormType,
   isPushConfig?: boolean
 ) {
+  const webContents = mainWindow.webContents
+
   // 获取已连接设备
   const devices = await getDevices()
+  // 获取命令列表
+  const commands = getCommands(options)
 
   for (const device of devices) {
     for (const item of commands) {
@@ -36,21 +40,23 @@ export async function installApp(
       const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device}`)
 
       try {
-        mainWindow.webContents.send('electron:execute-start', {
-          name: `正在${item.name}`
+        webContents.send('electron:install-message', {
+          type: 'doing',
+          message: `正在${item.name}`
         })
 
         await executeCommand(newCommand)
-      } catch (error: any) {
-        mainWindow.webContents.send('electron:execute-fail', {
-          name: `${item.name}失败`
+      } catch (error) {
+        webContents.send('electron:install-message', {
+          type: 'fail',
+          message: `${item.name}失败`
         })
 
         // 记录失败历史
         addHistory({
           id: device,
           packageName: options.packageName,
-          status: 'failed'
+          status: 'fail'
         })
 
         logger.error(`${item.name}失败\n${error}`)
@@ -67,5 +73,8 @@ export async function installApp(
     })
   }
 
-  mainWindow.webContents.send('electron:install-complete')
+  webContents.send('electron:install-message', {
+    type: 'complete',
+    message: '完成'
+  })
 }

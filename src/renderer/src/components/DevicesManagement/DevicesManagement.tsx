@@ -5,7 +5,7 @@ import { CheckCircleOutlined } from '@ant-design/icons'
 
 interface IProps {
   children?: ReactNode
-  isModalOpen: boolean
+  open: boolean
   onClose: () => void
 }
 
@@ -17,7 +17,7 @@ interface LocalDevices {
 
 const ipcRenderer = window.electron?.ipcRenderer
 
-const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
+const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
   const [localDevicesLoading, setLocalDevicesLoading] = useState(false)
   const [usbDevicesLoading, setUsbDevicesLoading] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
@@ -43,8 +43,8 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
 
   useEffect(() => {
     // 打开弹窗时回填已连接设备
-    isModalOpen && backFillDevices()
-  }, [isModalOpen])
+    open && backFillDevices()
+  }, [open])
 
   // 搜索本地设备
   const searchLocalDevices = async () => {
@@ -121,7 +121,7 @@ const DevicesManagement: FC<IProps> = ({ isModalOpen, onClose }) => {
   return (
     <Modal
       title="设备管理"
-      open={isModalOpen}
+      open={open}
       cancelText="取消"
       okText="确认"
       maskClosable={false}

@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react'
+import { memo } from 'react'
 import type { FC, ReactNode } from 'react'
 import { Form, Select, Button, Checkbox, message } from 'antd'
 
@@ -13,29 +13,26 @@ interface IProps {
   onFinish?: (value: FormType) => void
 }
 
+// 表单默认值
+const initialValues = import.meta.env.DEV
+  ? {
+      packageName: 'com.ch.yuanmingyuan.client',
+      apkFilePath: '/Users/congxin/Downloads/YMY/YMY.apk',
+      isUploadOBB: true,
+      obbFilePath: '/Users/congxin/Downloads/YMY/main.2.com.ch.yuanmingyuan.client.obb',
+      configFilePath: '/Users/congxin/Downloads/YMY/Config',
+      blockFilePath: '/Users/congxin/Downloads/YMY/Json'
+    }
+  : { isUploadOBB: true }
+
 const FormContainer: FC<IProps> = ({ loading, isPushConfig, onFinish }) => {
   const [form] = Form.useForm()
-
   const isUploadOBB = Form.useWatch('isUploadOBB', form)
-
-  const getInitialValues = useCallback(() => {
-    // 开发模式下设置默认值
-    return import.meta.env.DEV
-      ? {
-          packageName: 'com.ch.yuanmingyuan.client',
-          apkFilePath: '/Users/congxin/Downloads/YMY/YMY.apk',
-          isUploadOBB: true,
-          obbFilePath: '/Users/congxin/Downloads/YMY/main.2.com.ch.yuanmingyuan.client.obb',
-          configFilePath: '/Users/congxin/Downloads/YMY/Config',
-          blockFilePath: '/Users/congxin/Downloads/YMY/Json'
-        }
-      : { isUploadOBB: true }
-  }, [])
 
   return (
     <Form<FormType>
       form={form}
-      initialValues={getInitialValues()}
+      initialValues={initialValues}
       onFinish={(values) => onFinish?.({ ...values, configDir: configDirMap[values.packageName] })}
       onFinishFailed={() => {
         message.error('请检查信息是否填写正确')

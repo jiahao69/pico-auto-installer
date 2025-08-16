@@ -6,8 +6,8 @@ import find from 'local-devices'
 import { executeCommand } from './utils/execute-command'
 import { getDevices } from './utils/get-devices'
 import { readHistory } from './install-history'
-import { getCommands } from './get-commands'
-import { installApp } from './install-app'
+
+import { install } from './install'
 import { setEnvVariable } from './utils/set-env-variable'
 import { createTray } from './create-tray'
 
@@ -74,11 +74,8 @@ function createWindow() {
   // 获取安装历史
   ipcMain.handle('get-install-history', () => readHistory())
 
-  // 安装应用
-  ipcMain.on('install-app', (_, options: FormType, isPushConfig: boolean) => {
-    const commands = getCommands(options)
-
-    installApp(mainWindow, commands, options, isPushConfig)
+  ipcMain.on('install', (_, options: FormType, isPushConfig: boolean) => {
+    install(mainWindow, options, isPushConfig)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

@@ -7,7 +7,7 @@ interface DataType {
   timestamp: string
   id: string
   packageName: string
-  status: 'success' | 'failed'
+  status: 'success' | 'fail'
 }
 
 const columns: ColumnsType<DataType> = [

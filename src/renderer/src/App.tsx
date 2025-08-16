@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { message, Tabs, Alert, Button } from 'antd'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { message, Alert, Tabs, Button } from 'antd'
 
 import './App.less'
-import { version } from '../../../package.json'
 import logo from '@/assets/images/logo.png'
 
 import FormContainer from '@/components/FormContainer/FormContainer'
@@ -14,35 +13,44 @@ const ipcRenderer = window.electron?.ipcRenderer
 function App() {
   const [executeResult, setExecuteResult] = useState('未开始')
   const [loading, setLoading] = useState(false)
-  const [historyVisible, setHistoryVisible] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const TabItems = useMemo(() => {
+    return [
+      {
+        key: '1',
+        label: '安装应用',
+        children: <FormContainer loading={loading} onFinish={(values) => onInstall(values)} />
+      },
+      {
+        key: '2',
+        label: '推送配置文件',
+        children: (
+          <FormContainer
+            loading={loading}
+            isPushConfig={true}
+            onFinish={(values) => onInstall(values, true)}
+          />
+        )
+      }
+    ]
+  }, [loading])
+
   useEffect(() => {
-    // 执行开始
-    ipcRenderer.on('electron:execute-start', (_, { name }) => {
-      setExecuteResult(name)
-    })
-
-    // 执行失败
-    ipcRenderer.on('electron:execute-fail', (_, { name }) => {
-      setLoading(false)
-      setExecuteResult(name)
-    })
-
-    // 安装完成
-    ipcRenderer.on('electron:install-complete', () => {
-      setLoading(false)
-      setExecuteResult('完成')
+    ipcRenderer.on('electron:install-message', (_, { type, message }) => {
+      type !== 'doing' && setLoading(false)
+      setExecuteResult(message)
     })
 
     // 打开安装历史弹窗
     ipcRenderer.on('electron:open-install-history', () => {
-      setHistoryVisible(true)
+      setIsHistoryOpen(true)
     })
   }, [])
 
   // 点击一键安装
-  const onInstallApp = useCallback(async (values: FormType, isPushConfig?: boolean) => {
+  const onInstall = useCallback(async (values: FormType, isPushConfig?: boolean) => {
     const devices: string[] = await ipcRenderer.invoke('get-devices')
 
     if (!devices.length) {
@@ -52,7 +60,7 @@ function App() {
 
     setLoading(true)
     // 执行安装脚本
-    ipcRenderer.send('install-app', values, isPushConfig)
+    ipcRenderer.send('install', values, isPushConfig)
   }, [])
 
   return (
@@ -63,52 +71,31 @@ function App() {
       </div>
 
       <Tabs
+        items={TabItems}
         tabBarExtraContent={{
           right: (
-            <Button type="primary" onClick={() => setIsModalOpen(true)}>
+            <Button type="primary" onClick={useCallback(() => setIsModalOpen(true), [])}>
               设备管理
             </Button>
           )
         }}
-        items={[
-          {
-            key: '1',
-            label: '安装应用',
-            children: (
-              <FormContainer loading={loading} onFinish={(values) => onInstallApp(values)} />
-            )
-          },
-          {
-            key: '2',
-            label: '推送配置文件',
-            children: (
-              <FormContainer
-                loading={loading}
-                isPushConfig={true}
-                onFinish={(values) => onInstallApp(values)}
-              />
-            )
-          }
-        ]}
       />
 
       {/* 安装历史 */}
       <InstallHistory
-        open={historyVisible}
-        onClose={useCallback(() => setHistoryVisible(false), [])}
+        open={isHistoryOpen}
+        onClose={useCallback(() => setIsHistoryOpen(false), [])}
       />
 
       {/* 设备管理 */}
       <DevicesManagement
-        isModalOpen={isModalOpen}
+        open={isModalOpen}
         onClose={useCallback(() => setIsModalOpen(false), [])}
       />
 
       <div className="logo">
         <img src={logo} alt="" />
       </div>
-
-      <div className="version">V{version}</div>
     </div>
   )
 }
