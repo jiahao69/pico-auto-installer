@@ -40,7 +40,7 @@ nsis:
   createDesktopShortcut: always
 portable:
   # 安装包文件名称
-  artifactName: ${name}-${version}.${ext}
+  artifactName: 川核VR大空间一键部署程序-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic

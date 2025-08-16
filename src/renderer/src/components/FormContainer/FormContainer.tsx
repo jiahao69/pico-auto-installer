@@ -43,7 +43,7 @@ const FormContainer: FC<IProps> = ({ loading, isPushConfig, onFinish }) => {
         name="packageName"
         rules={[{ required: true, message: '请选择应用名称' }]}
       >
-        <Select options={appNameSelectOptions} />
+        <Select placeholder="请选择应用名称" options={appNameSelectOptions} />
       </Form.Item>
 
       {!isPushConfig && (
