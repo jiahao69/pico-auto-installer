@@ -16,12 +16,12 @@ interface IProps {
 // 表单默认值
 const initialValues = import.meta.env.DEV
   ? {
-      packageName: 'com.ch.yuanmingyuan.client',
-      apkFilePath: '/Users/congxin/Downloads/YMY/YMY.apk',
-      isUploadOBB: true,
+      packageName: 'com.ch.dunhuang.client',
+      apkFilePath: '/Users/congxin/Downloads/Android_ASTC/DHVR-arm64.apk',
+      isUploadOBB: false,
       obbFilePath: '/Users/congxin/Downloads/YMY/main.2.com.ch.yuanmingyuan.client.obb',
-      configFilePath: '/Users/congxin/Downloads/YMY/Config',
-      blockFilePath: '/Users/congxin/Downloads/YMY/Json'
+      configFilePath: '/Users/congxin/Downloads/Android_ASTC/Config',
+      blockFilePath: '/Users/congxin/Downloads/Android_ASTC/Json'
     }
   : { isUploadOBB: true }
 

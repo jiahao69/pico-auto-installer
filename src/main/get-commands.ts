@@ -9,7 +9,7 @@ export function getCommands(options: FormType) {
     { name: '安装新应用', command: `adb install ${options.apkFilePath}` },
     {
       name: '启动应用',
-      command: `adb shell am start -n ${options.packageName}/com.epicgames.unreal.GameActivity`
+      command: `adb shell am start -W -n ${options.packageName}/com.epicgames.unreal.GameActivity`
     },
     {
       name: '推送OBB文件',
