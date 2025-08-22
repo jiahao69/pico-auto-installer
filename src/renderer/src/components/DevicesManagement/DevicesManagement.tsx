@@ -20,7 +20,7 @@ const ipcRenderer = window.electron?.ipcRenderer
 const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
   const [localDevicesLoading, setLocalDevicesLoading] = useState(false)
   const [usbDevicesLoading, setUsbDevicesLoading] = useState(false)
-  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [connectLoading, setConnectLoading] = useState(false)
   const [localDevices, setLocalDevices] = useState<string[]>([])
   const [usbDevices, setUsbDevices] = useState<string[]>([])
   const [connectedLocalDevices, setConnectedLocalDevices] = useState<string[]>([])
@@ -42,8 +42,8 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
   }, [])
 
   useEffect(() => {
-    // 打开弹窗时回填已连接设备
-    open && backFillDevices()
+    // 打开弹窗时更新设备
+    open && updateDevices()
   }, [open])
 
   // 搜索本地设备
@@ -69,8 +69,8 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
     setUsbDevicesLoading(false)
   }
 
-  // 回填已连接设备
-  const backFillDevices = async () => {
+  // 更新设备
+  const updateDevices = async () => {
     const devices: string[] = await ipcRenderer.invoke('get-devices')
 
     // 已连接的USB设备
@@ -92,7 +92,7 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
       return
     }
 
-    setConfirmLoading(true)
+    setConnectLoading(true)
 
     const promises = localDevices.map((device) => {
       // 连接(勾选且未连接的设备)
@@ -112,9 +112,10 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
     // 所有promise结果都已敲定时返回的promise将被兑现
     await Promise.allSettled(promises)
 
-    setConfirmLoading(false)
+    // 更新设备
+    await updateDevices()
 
-    onClose()
+    setConnectLoading(false)
     message.success('操作成功')
   }
 
@@ -124,14 +125,16 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
       open={open}
       cancelText="取消"
       okText="确认"
+      confirmLoading={connectLoading}
       maskClosable={false}
-      confirmLoading={confirmLoading}
       width="80%"
       onCancel={onClose}
       onOk={onOk}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h4 style={{ marginRight: '20px' }}>无线连接设备(绿色代表设备已连接)</h4>
+        <div style={{ marginRight: '20px', fontWeight: 'bold' }}>
+          无线连接设备(绿色代表设备已连接)
+        </div>
         <Button
           type="primary"
           loading={localDevicesLoading}
@@ -173,7 +176,7 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
       <Divider />
 
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h4 style={{ marginRight: '20px' }}>USB连接设备</h4>
+        <div style={{ marginRight: '20px', fontWeight: 'bold' }}>USB连接设备</div>
         <Button
           type="primary"
           loading={usbDevicesLoading}
