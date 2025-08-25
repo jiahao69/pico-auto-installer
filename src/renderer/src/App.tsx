@@ -3,6 +3,7 @@ import { message, Alert, Tabs, Button } from 'antd'
 
 import './App.less'
 import logo from '@/assets/images/logo.png'
+import { version } from '../../../package.json'
 
 import FormContainer from '@/components/FormContainer/FormContainer'
 import InstallHistory from '@/components/InstallHistory/InstallHistory'
@@ -92,6 +93,8 @@ function App() {
         open={isModalOpen}
         onClose={useCallback(() => setIsModalOpen(false), [])}
       />
+
+      <div className="version">v{version}</div>
 
       <div className="logo">
         <img src={logo} alt="" />
