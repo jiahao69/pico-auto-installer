@@ -15,7 +15,6 @@ import { createTray } from './create-tray'
 app.commandLine.appendSwitch('lang', 'zh-CN')
 
 function createWindow() {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 880,
     height: 700,
@@ -33,14 +32,14 @@ function createWindow() {
   })
 
   // 点击选择按钮触发
-  ipcMain.handle('select-file', async (_, openType) => {
+  ipcMain.handle('select-file', async (_, openType: OpenType) => {
     // 显示文件选择对话框
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: [openType]
     })
 
     // 用户取消选择
-    if (canceled) return
+    if (canceled) return ''
 
     // 返回文件路径
     return filePaths[0]
@@ -48,12 +47,9 @@ function createWindow() {
 
   // 执行渲染进程发送的命令
   ipcMain.handle('execute-command', async (_, command: string) => {
-    try {
-      const result = await executeCommand(command)
-      console.log(result)
-    } catch (err) {
-      console.log(err)
-    }
+    const result = await executeCommand(command)
+
+    return result
   })
 
   // 获取已连接设备
@@ -65,7 +61,6 @@ function createWindow() {
 
   // 获取本地设备
   ipcMain.handle('get-local-devices', async () => {
-    // skipNameResolution 跳过名称解析，提升性能
     const devices = await find({ skipNameResolution: true })
 
     return devices

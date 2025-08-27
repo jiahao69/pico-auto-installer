@@ -53,7 +53,7 @@ const InstallHistory: FC<IProps> = ({ open, onClose }) => {
     if (open) {
       setLoading(true)
       // 获取历史记录
-      window.electron?.ipcRenderer.invoke('get-install-history').then((history) => {
+      window.electron?.ipcRenderer.invoke('get-install-history').then((history: DataType[]) => {
         setData(history)
         setLoading(false)
       })

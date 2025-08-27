@@ -14,7 +14,8 @@ export function getCommands(options: FormType) {
     {
       name: '推送OBB文件',
       command: `adb push "${options.obbFilePath}" /sdcard/Download/ &&
-      adb shell mv /sdcard/Download/${getBasename(options.obbFilePath)} /sdcard/Android/obb/${options.packageName}/${getBasename(options.obbFilePath)}`
+      adb shell mv /sdcard/Download/${getBasename(options.obbFilePath)}
+      /sdcard/Android/obb/${options.packageName}/${getBasename(options.obbFilePath)}`
     },
     {
       name: '推送OBB文件后关闭应用',
@@ -31,16 +32,16 @@ export function getCommands(options: FormType) {
     {
       name: '推送配置文件夹',
       command: `adb push "${options.configFilePath}" /sdcard/Download/ &&
-      adb shell mv /sdcard/Download/${getBasename(options.configFilePath)} /sdcard/Android/data/${options.packageName}/files/UnrealGame/${options.configDir}/${options.configDir}/`
+      adb shell mv /sdcard/Download/${getBasename(options.configFilePath)}
+      /sdcard/Android/data/${options.packageName}/files/UnrealGame/${options.configDir}/${options.configDir}/`
     },
     {
       name: '推送动块文件夹',
       command: `adb push "${options.blockFilePath}" /sdcard/Download/ &&
-      adb shell mv /sdcard/Download/${getBasename(options.blockFilePath)} /sdcard/Android/data/${options.packageName}/files/UnrealGame/${options.configDir}/${options.configDir}/`
+      adb shell mv /sdcard/Download/${getBasename(options.blockFilePath)}
+      /sdcard/Android/data/${options.packageName}/files/UnrealGame/${options.configDir}/${options.configDir}/`
     }
   ]
-
-  console.log(commands)
 
   return commands
 }

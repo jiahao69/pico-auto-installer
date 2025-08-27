@@ -36,8 +36,8 @@ export async function install(
         continue
       }
 
-      // 替换命令，使用 -s 指定设备
-      const newCommand = item.command.replace(/\badb\b/g, `adb -s ${device}`)
+      // 将换行符替换为空 ,将 adb 替换为 adb -s 指定设备
+      const newCommand = item.command.replace(/\n/g, '').replace(/\badb\b/g, `adb -s ${device}`)
 
       try {
         webContents.send('electron:install-message', {
