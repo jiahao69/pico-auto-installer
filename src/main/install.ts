@@ -6,51 +6,50 @@ import { executeCommand } from './utils/execute-command'
 import { addHistory } from './install-history'
 import { logger } from './logger'
 
-export async function install(
-  mainWindow: BrowserWindow,
-  options: FormType,
-  isPushConfig?: boolean
-) {
+const pushObbSteps = ['推送OBB文件', '推送OBB文件后关闭应用', '推送OBB文件后启动应用']
+const pushConfigSteps = ['创建配置文件目录', '推送配置文件夹', '推送动块文件夹']
+
+export async function install(mainWindow: BrowserWindow, options: FormType, isPushConfig = false) {
   const webContents = mainWindow.webContents
 
-  // 获取已连接设备
-  const devices = await getDevices()
-  // 获取命令列表
-  const commands = getCommands(options)
+  let successDeviceCount = 0
+  let failedDeviceCount = 0
 
-  for (const device of devices) {
+  const commands = getCommands(options)
+  const devices = await getDevices()
+
+  for (let i = 0; i < devices.length; i++) {
+    let hasError = false
+    const device = devices[i]
+
     for (const item of commands) {
-      // 跳过推送OBB文件
-      if (
-        !options.isUploadOBB &&
-        ['推送OBB文件', '推送OBB文件后关闭应用', '推送OBB文件后启动应用'].includes(item.name)
-      ) {
+      // 跳过推送OBB文件命令
+      if (!options.isUploadOBB && pushObbSteps.includes(item.name)) {
         continue
       }
 
       // 跳过非推送配置文件命令
-      if (
-        isPushConfig &&
-        !['创建配置文件目录', '推送配置文件夹', '推送动块文件夹'].includes(item.name)
-      ) {
+      if (isPushConfig && !pushConfigSteps.includes(item.name)) {
         continue
       }
 
-      // 将换行符替换为空 ,将 adb 替换为 adb -s 指定设备
       const newCommand = item.command.replace(/\n/g, '').replace(/\badb\b/g, `adb -s ${device}`)
 
       try {
-        webContents.send('electron:install-message', {
-          type: 'doing',
-          message: `正在${item.name}`
+        webContents.send('install-message-update', {
+          status: 'start',
+          message: `第${i + 1}台设备 ${device} ${item.name}`
         })
 
-        await executeCommand(newCommand)
+        const result = await executeCommand(newCommand)
+        console.log(`第${i + 1}台设备 ${device} ${item.name}\n${result}`)
       } catch (error) {
-        webContents.send('electron:install-message', {
-          type: 'fail',
-          message: `${item.name}失败`
+        webContents.send('install-message-update', {
+          status: 'failed',
+          message: `第${i + 1}台设备 ${device} ${item.name}失败`
         })
+
+        failedDeviceCount++
 
         // 记录失败历史
         addHistory({
@@ -61,9 +60,14 @@ export async function install(
 
         logger.error(`${item.name}失败\n${error}`)
 
-        return
+        hasError = true
+        break
       }
     }
+
+    if (hasError) continue
+
+    successDeviceCount++
 
     // 记录成功历史
     addHistory({
@@ -73,8 +77,8 @@ export async function install(
     })
   }
 
-  webContents.send('electron:install-message', {
+  webContents.send('install-message-update', {
     type: 'complete',
-    message: '完成'
+    message: `安装完成 共${devices.length}台设备 成功${successDeviceCount}台 失败${failedDeviceCount}台`
   })
 }

@@ -42,8 +42,8 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
   }, [])
 
   useEffect(() => {
-    // 打开弹窗时更新设备
-    open && updateDevices()
+    // 打开弹窗时更新已连接设备
+    open && updateConnectedDevices()
   }, [open])
 
   // 搜索本地设备
@@ -69,13 +69,15 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
     setUsbDevicesLoading(false)
   }
 
-  // 更新设备
-  const updateDevices = async () => {
+  // 更新已连接设备
+  const updateConnectedDevices = async (isUpdateUsbDevices = true) => {
     const devices: string[] = await ipcRenderer.invoke('get-devices')
 
-    // 已连接的USB设备
-    const usbDevices = devices.filter((item) => !item.includes(':'))
-    setUsbDevices(usbDevices)
+    if (isUpdateUsbDevices) {
+      // 已连接的USB设备
+      const usbDevices = devices.filter((item) => !item.includes(':'))
+      setUsbDevices(usbDevices)
+    }
 
     // 已连接的本地设备
     const connectedLocalDevices = devices
@@ -109,11 +111,10 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
       return Promise.resolve()
     })
 
-    // 所有promise结果都已敲定时返回的promise将被兑现
     await Promise.allSettled(promises)
 
-    // 更新设备
-    await updateDevices()
+    // 更新已连接设备
+    await updateConnectedDevices(false)
 
     setConnectLoading(false)
     message.success('操作成功')
@@ -189,7 +190,7 @@ const DevicesManagement: FC<IProps> = ({ open, onClose }) => {
         </Button>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', rowGap: '6px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', rowGap: '6px', marginTop: '10px' }}>
         {usbDevices.map((device) => (
           <Tag icon={<CheckCircleOutlined />} color="success">
             {device}

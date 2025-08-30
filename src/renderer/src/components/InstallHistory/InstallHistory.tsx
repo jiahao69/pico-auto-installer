@@ -28,7 +28,7 @@ const columns: ColumnsType<DataType> = [
   },
   {
     title: '安装结果',
-    width: 90,
+    width: 80,
     dataIndex: 'status',
     key: 'status',
     render: (_, { status }) => (
@@ -64,17 +64,17 @@ const InstallHistory: FC<IProps> = ({ open, onClose }) => {
     <Modal
       title="安装历史"
       open={open}
-      width={900}
-      onCancel={onClose}
       footer={null}
       maskClosable={false}
+      width="90%"
+      onCancel={onClose}
     >
       <Table
         columns={columns}
         dataSource={data}
         loading={loading}
         size="middle"
-        scroll={{ y: 400 }}
+        scroll={{ y: 300 }}
         pagination={false}
       ></Table>
     </Modal>

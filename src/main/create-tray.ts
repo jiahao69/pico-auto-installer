@@ -1,10 +1,10 @@
-import { app, BrowserWindow, Tray, nativeImage, Menu, shell } from 'electron'
+import { app, Tray, nativeImage, Menu, shell } from 'electron'
 import { join } from 'path'
 
 import appIcon from '../../build/icon.png?asset'
 
 // 创建系统托盘
-export function createTray(mainWindow: BrowserWindow) {
+export function createTray() {
   const tray = new Tray(nativeImage.createFromPath(appIcon))
 
   const userDataPath = app.getPath('userData')
@@ -16,13 +16,6 @@ export function createTray(mainWindow: BrowserWindow) {
       type: 'normal',
       click: () => {
         shell.openPath(logPath)
-      }
-    },
-    {
-      label: '打开安装历史',
-      type: 'normal',
-      click: () => {
-        mainWindow.webContents.send('electron:open-install-history')
       }
     }
   ])

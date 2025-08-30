@@ -104,13 +104,13 @@ app.whenReady().then(() => {
   })
 
   // 创建窗口
-  const mainWindow = createWindow()
+  createWindow()
 
   // 设置环境变量
   setEnvVariable()
 
   // 创建系统托盘
-  createTray(mainWindow)
+  createTray()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
