@@ -11,7 +11,6 @@ const pushConfigSteps = ['创建配置文件目录', '推送配置文件夹', '�
 
 export async function install(mainWindow: BrowserWindow, options: FormType, isPushConfig = false) {
   const webContents = mainWindow.webContents
-
   let successDeviceCount = 0
   let failedDeviceCount = 0
 
@@ -38,7 +37,7 @@ export async function install(mainWindow: BrowserWindow, options: FormType, isPu
       try {
         webContents.send('install-message-update', {
           status: 'start',
-          message: `第${i + 1}台设备 ${device} ${item.name}`
+          message: `第${i + 1}台设备 ${item.name}`
         })
 
         const result = await executeCommand(newCommand)
@@ -50,17 +49,17 @@ export async function install(mainWindow: BrowserWindow, options: FormType, isPu
         })
 
         failedDeviceCount++
+        hasError = true
 
         // 记录失败历史
         addHistory({
           id: device,
           packageName: options.packageName,
-          status: 'fail'
+          status: 'failed'
         })
 
         logger.error(`${item.name}失败\n${error}`)
 
-        hasError = true
         break
       }
     }

@@ -11,7 +11,7 @@ export interface InstallHistory {
   timestamp: string
   id: string
   packageName: string
-  status: 'success' | 'fail'
+  status: 'success' | 'failed'
 }
 
 // 确保历史记录文件存在
